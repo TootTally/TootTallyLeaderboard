@@ -3,32 +3,41 @@ using BepInEx;
 using BepInEx.Configuration;
 using HarmonyLib;
 using System.IO;
+using TootTallyCore.Utils.Assets;
 using TootTallyCore.Utils.TootTallyModules;
+using TootTallyLeaderboard.GameplayModifier;
+using TootTallyLeaderboard.Replays;
 using TootTallySettings;
-using UnityEngine;
 
-namespace TootTally.ModuleTemplate
+namespace TootTallyLeaderboard
 {
     [BepInPlugin(PluginInfo.PLUGIN_GUID, PluginInfo.PLUGIN_NAME, PluginInfo.PLUGIN_VERSION)]
     [BepInDependency("TootTallyCore", BepInDependency.DependencyFlags.HardDependency)]
     [BepInDependency("TootTallySettings", BepInDependency.DependencyFlags.HardDependency)]
+    [BepInDependency("TootTallyAccounts", BepInDependency.DependencyFlags.HardDependency)]
     public class Plugin : BaseUnityPlugin, ITootTallyModule
     {
         public static Plugin Instance;
 
-        private const string CONFIG_NAME = "ModuleTemplate.cfg";
+        private const string CONFIG_NAME = "TootTally.cfg";
         public Options option;
         private Harmony _harmony;
         public ConfigEntry<bool> ModuleConfigEnabled { get; set; }
         public bool IsConfigInitialized { get; set; }
 
         //Change this name to whatever you want
-        public string Name { get => PluginInfo.PLUGIN_NAME; set => Name = value; }
+        public string Name { get => "TootTally Leaderboard"; set => Name = value; }
 
         public static TootTallySettingPage settingPage;
 
         public static void LogInfo(string msg) => Instance.Logger.LogInfo(msg);
         public static void LogError(string msg) => Instance.Logger.LogError(msg);
+        public static void LogWarning(string msg) => Instance.Logger.LogWarning(msg);
+        public static void LogDebug(string msg)
+        {
+            if (TootTallyCore.Plugin.Instance.DebugMode.Value)
+                Instance.Logger.LogDebug(msg);
+        }
 
         private void Awake()
         {
@@ -42,8 +51,7 @@ namespace TootTally.ModuleTemplate
         private void TryInitialize()
         {
             // Bind to the TTModules Config for TootTally
-            ModuleConfigEnabled = TootTallyCore.Plugin.Instance.Config.Bind("Modules", "<insert module name here>", true, "<insert module description here>");
-            TootTallySettings.Plugin.Instance.AddModuleToSettingPage(this);
+            ModuleConfigEnabled = TootTallyCore.Plugin.Instance.Config.Bind("Modules", "TootTally Leaderboard", true, "Leaderboard and Replay features for TootTally");
             TootTallyModuleManager.AddModule(this);
         }
 
@@ -53,19 +61,21 @@ namespace TootTally.ModuleTemplate
             ConfigFile config = new ConfigFile(configPath + CONFIG_NAME, true);
             option = new Options()
             {
-                // Set your config here by binding them to the related ConfigEntry in your Options class
-                // Example:
-                // Unlimited = config.Bind(CONFIG_FIELD, "Unlimited", DEFAULT_UNLISETTING)
+                ShowLeaderboard = Config.Bind("General", "Show Leaderboard", true, "Show TootTally Leaderboard on Song Select."),
+                ShowCoolS = Config.Bind("General", "Show Cool S", false, "Show special graphic when getting SS and SSS on a song."),
+                ChangePitchSpeed = Config.Bind("General", "Change Pitch Speed", false, "Change the pitch on speed changes"),
             };
 
-            settingPage = TootTallySettingsManager.AddNewPage("ModulePageName", "HeaderText", 40f, new Color(0,0,0,0));
-            if (settingPage != null) {
-                // Use TootTallySettingPage functions to add your objects to TootTallySetting
-                // Example:
-                // page.AddToggle(name, option.Unlimited);
-            }
+            TootTallySettings.Plugin.MainTootTallySettingPage.AddToggle("Show Leaderboard", option.ShowLeaderboard);
+            TootTallySettings.Plugin.MainTootTallySettingPage.AddToggle("Show Cool S", option.ShowCoolS);
+            TootTallySettings.Plugin.MainTootTallySettingPage.AddToggle("Change Pitch Speed", option.ChangePitchSpeed);
 
-            _harmony.PatchAll(typeof(ModuleTemplatePatches));
+            AssetManager.LoadAssets(Path.Combine(Path.GetDirectoryName(Instance.Info.Location), "Assets"));
+
+            _harmony.PatchAll(typeof(LeaderboardFactory));
+            _harmony.PatchAll(typeof(ReplaySystemManager));
+            _harmony.PatchAll(typeof(GlobalLeaderboardManager));
+            _harmony.PatchAll(typeof(GameModifierManager));
             LogInfo($"Module loaded!");
         }
 
@@ -76,16 +86,11 @@ namespace TootTally.ModuleTemplate
             LogInfo($"Module unloaded!");
         }
 
-        public static class ModuleTemplatePatches
-        {
-            // Apply your Trombone Champ patches here
-        }
-
         public class Options
         {
-            // Fill this class up with ConfigEntry objects that define your configs
-            // Example:
-            // public ConfigEntry<bool> Unlimited { get; set; }
+            public ConfigEntry<bool> ShowLeaderboard { get; set; }
+            public ConfigEntry<bool> ShowCoolS { get; set; }
+            public ConfigEntry<bool> ChangePitchSpeed { get; set; }
         }
     }
 }

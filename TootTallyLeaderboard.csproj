@@ -2,9 +2,9 @@
 
 	<PropertyGroup>
 		<TargetFramework>net472</TargetFramework>
-		<AssemblyName>TootTally.ModuleTemplate</AssemblyName>
-		<Description>TootTally Module Template</Description>
-		<Version>0.1.0</Version>
+		<AssemblyName>TootTallyLeaderboard</AssemblyName>
+		<Description>TootTally Leaderboard and Replay module</Description>
+		<Version>1.0.0</Version>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<LangVersion>latest</LangVersion>
 		<TromboneChampDir>E:\SteamLibrary\steamapps\common\TromboneChamp</TromboneChampDir>
@@ -16,6 +16,7 @@
 		<PackageReference Include="BepInEx.Core" Version="5.*" />
 		<PackageReference Include="BepInEx.PluginInfoProps" Version="1.*" />
 		<PackageReference Include="UnityEngine.Modules" Version="2019.4.40" IncludeAssets="compile" />
+		<PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
 		<PackageReference Include="TromboneChamp.GameLibs" Version="1.17.0-beta" />
 		<PackageReference Include="TromboneChamp.BaboonAPI" Version="2.5.0" />
 		<PackageReference Include="TromboneChamp.TrombLoader" Version="2.0.0-rc.1" />
@@ -30,14 +31,18 @@
 			<HintPath>$(TromboneTootDir)\BepInEx\plugins\TootTally-Core\TootTallyCore.dll</HintPath>
 		</Reference>
 	</ItemGroup>
-
 	<ItemGroup>
 		<Reference Include="TootTallySettings">
 			<HintPath>$(TromboneTootDir)\BepInEx\plugins\TootTally-Settings\TootTallySettings.dll</HintPath>
 		</Reference>
 	</ItemGroup>
+	<ItemGroup>
+		<Reference Include="TootTallyAccounts">
+			<HintPath>$(TromboneTootDir)\BepInEx\plugins\TootTally-Accounts\TootTallyAccounts.dll</HintPath>
+		</Reference>
+	</ItemGroup>
 
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
-		<Copy SourceFiles="$(TargetPath)" DestinationFolder="$(TromboneTootDir)\BepInEx\plugins\TootTally-ModuleTemplate" />
+		<Copy SourceFiles="$(TargetPath)" DestinationFolder="$(TromboneTootDir)\BepInEx\plugins\TootTally-Leaderboard" />
 	</Target>
 </Project>
