@@ -488,6 +488,16 @@ namespace TootTallyLeaderboard
 
                 Button btn = currentTab.GetComponentInChildren<Button>();
                 btn.image.sprite = AssetManager.GetSprite(tabsImageNames[i]);
+                btn.image.color = Color.white;
+                btn.colors = new ColorBlock
+                {
+                    normalColor = Color.white,
+                    selectedColor = Color.white,
+                    pressedColor = Color.yellow,
+                    highlightedColor = Color.gray,
+                    fadeDuration = .1f,
+                    colorMultiplier = 1f
+                };
 
             }
             _tabs.SetActive(true);
