@@ -36,6 +36,9 @@
 		<Reference Include="TootTallyAccounts">
 			<HintPath>$(TromboneTootDir)\BepInEx\plugins\TootTally-Accounts\TootTallyAccounts.dll</HintPath>
 		</Reference>
+		<Reference Include="TootTallyGameModifiers">
+			<HintPath>$(TromboneTootDir)\BepInEx\plugins\TootTally-GameModifiers\TootTallyGameModifiers.dll</HintPath>
+		</Reference>
 	</ItemGroup>
 
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">

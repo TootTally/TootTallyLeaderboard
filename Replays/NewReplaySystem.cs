@@ -9,7 +9,7 @@ using Newtonsoft.Json;
 using TootTallyAccounts;
 using TootTallyCore.Utils.Helpers;
 using TootTallyCore.Utils.TootTallyNotifs;
-using TootTallyLeaderboard.GameplayModifier;
+using TootTallyGameModifiers;
 using TrombLoader.CustomTracks;
 using UnityEngine;
 

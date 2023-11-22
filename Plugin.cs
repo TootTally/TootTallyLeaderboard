@@ -5,7 +5,6 @@ using HarmonyLib;
 using System.IO;
 using TootTallyCore.Utils.Assets;
 using TootTallyCore.Utils.TootTallyModules;
-using TootTallyLeaderboard.GameplayModifier;
 using TootTallyLeaderboard.Replays;
 using TootTallySettings;
 
@@ -15,6 +14,7 @@ namespace TootTallyLeaderboard
     [BepInDependency("TootTallyCore", BepInDependency.DependencyFlags.HardDependency)]
     [BepInDependency("TootTallySettings", BepInDependency.DependencyFlags.HardDependency)]
     [BepInDependency("TootTallyAccounts", BepInDependency.DependencyFlags.HardDependency)]
+    [BepInDependency("TootTallyGameModifiers", BepInDependency.DependencyFlags.HardDependency)]
     public class Plugin : BaseUnityPlugin, ITootTallyModule
     {
         public static Plugin Instance;
@@ -75,7 +75,6 @@ namespace TootTallyLeaderboard
             _harmony.PatchAll(typeof(LeaderboardFactory));
             _harmony.PatchAll(typeof(ReplaySystemManager));
             _harmony.PatchAll(typeof(GlobalLeaderboardManager));
-            _harmony.PatchAll(typeof(GameModifierManager));
             LogInfo($"Module loaded!");
         }
 
