@@ -460,7 +460,7 @@ namespace TootTallyLeaderboard.Replays
 
         [HarmonyPatch(typeof(GameController), nameof(GameController.resumeTrack))]
         [HarmonyPostfix]
-        static void GameControllerResumeTrackPostfixPatch(GameController __instance)
+        public static void GameControllerResumeTrackPostfixPatch(GameController __instance)
         {
             if (_replayFileName != null && _replayFileName != "Spectating")
                 _replayManagerState = ReplayManagerState.Replaying;
