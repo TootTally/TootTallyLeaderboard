@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Remoting.Metadata.W3cXsd2001;
 using BaboonAPI.Hooks.Tracks;
+using HarmonyLib;
 using TMPro;
 using TootTallyAccounts;
 using TootTallyCore.APIServices;
@@ -26,6 +28,7 @@ namespace TootTallyLeaderboard
         private static Dictionary<string, Color> gradeToColorDict = new Dictionary<string, Color> { { "SSS", Color.yellow }, { "SS", Color.yellow }, { "S", Color.yellow }, { "A", Color.green }, { "B", new Color(0, .4f, 1f) }, { "C", Color.magenta }, { "D", Color.red }, { "F", Color.grey }, };
         private static string[] tabsImageNames = { "profile64.png", "global64.png", "local64.png" };
         private static float[] _starSizeDeltaPositions = { 0, 20, 58, 96, 134, 172, 210, 248, 285, 324, 361 };
+        private static GameObject _fullScreenPanelCanvas;
         #endregion
 
         private List<IEnumerator<UnityWebRequestAsyncOperation>> _currentLeaderboardCoroutines;
@@ -58,11 +61,12 @@ namespace TootTallyLeaderboard
 
         public void Initialize(LevelSelectController __instance)
         {
+            _fullScreenPanelCanvas = GameObject.Find("MainCanvas/FullScreenPanel");
             _levelSelectControllerInstance = __instance;
             _currentLeaderboardCoroutines = new List<IEnumerator<UnityWebRequestAsyncOperation>>();
             _scoreGameObjectList = new List<LeaderboardRowEntry>();
             ClearBaseLeaderboard();
-            CustomizeGameMenuUI();
+            CustomizeGameMenuUI(__instance);
 
             _leaderboard.transform.SetAsLastSibling();
             _globalLeaderboard = LeaderboardFactory.CreateSteamLeaderboardFromPrefab(_leaderboard.transform, "GlobalLeaderboard");
@@ -108,21 +112,20 @@ namespace TootTallyLeaderboard
 
             SetOnSliderValueChangeEvent();
 
-            GameObject diffBar = GameObject.Find("MainCanvas/FullScreenPanel/diff bar");
-            GameObject.DestroyImmediate(GameObject.Find("MainCanvas/FullScreenPanel/difficulty text").gameObject);
+            GameObject diffBar = _fullScreenPanelCanvas.transform.Find("diff bar").gameObject;
+            GameObject.DestroyImmediate(_fullScreenPanelCanvas.transform.Find("difficulty text").gameObject);
             var t = GameObjectFactory.CreateSingleText(diffBar.transform, "Difficulty Text", "Difficulty:", Color.white, GameObjectFactory.TextFont.Multicolore);
             t.alignment = TextAlignmentOptions.Left;
             t.margin = new Vector2(80, 4);
             t.fontSize = 16;
 
-            GameObject diffStarsHolder = GameObject.Find("MainCanvas/FullScreenPanel/difficulty stars");
+            GameObject diffStarsHolder = _fullScreenPanelCanvas.transform.Find("difficulty stars").gameObject;
             _diffRatingMaskRectangle = diffStarsHolder.GetComponent<RectTransform>();
             _diffRatingMaskRectangle.anchoredPosition = new Vector2(-284, -48);
             _diffRatingMaskRectangle.sizeDelta = new Vector2(0, 30);
             var mask = diffStarsHolder.AddComponent<Mask>();
             mask.showMaskGraphic = false;
             diffStarsHolder.AddComponent<Image>();
-            //imageMask.color = new Color(0, 0, 0, 0.01f); //if set at 0 stars wont display ?__?
             diffBar.GetComponent<RectTransform>().sizeDelta += new Vector2(41.5f, 0);
             _diffRating = GameObjectFactory.CreateSingleText(diffBar.transform, "diffRating", "", Color.white, GameObjectFactory.TextFont.Multicolore);
             _diffRating.outlineColor = Color.black;
@@ -154,7 +157,7 @@ namespace TootTallyLeaderboard
 
         public void ClearBaseLeaderboard()
         {
-            _leaderboard = GameObject.Find("MainCanvas/FullScreenPanel/Leaderboard").gameObject;
+            _leaderboard = _fullScreenPanelCanvas.transform.Find("Leaderboard").gameObject;
 
             //clear original Leaderboard from its objects
             foreach (Transform gameObjectTransform in _leaderboard.transform)
@@ -166,38 +169,38 @@ namespace TootTallyLeaderboard
                 _leaderboard.transform.Find(i.ToString()).gameObject.SetActive(false);
         }
 
-        public void CustomizeGameMenuUI()
+        public void CustomizeGameMenuUI(LevelSelectController __instance)
         {
             try
             {
                 //fuck that useless Dial
-                GameObject.Find("MainCanvas/FullScreenPanel/Dial").gameObject.SetActive(false);
+                _fullScreenPanelCanvas.transform.Find("Dial").gameObject.SetActive(false);
 
                 //move capsules to the left
-                GameObject.Find("MainCanvas/FullScreenPanel/capsules").GetComponent<RectTransform>().anchoredPosition = new Vector2(-275, 32);
+                _fullScreenPanelCanvas.transform.Find("capsules").GetComponent<RectTransform>().anchoredPosition = new Vector2(-275, 32);
 
                 //move btn_random next to capsules
-                GameObject.Find("MainCanvas/FullScreenPanel/btn_RANDOM").GetComponent<RectTransform>().anchoredPosition = new Vector2(-123, -7);
+                _fullScreenPanelCanvas.transform.Find("btn_RANDOM").GetComponent<RectTransform>().anchoredPosition = new Vector2(-123, -7);
 
                 //move btn_turbo somewhere
-                GameObject.Find("MainCanvas/FullScreenPanel/btn_TURBO").GetComponent<RectTransform>().anchoredPosition = new Vector2(-110, 65);
+                _fullScreenPanelCanvas.transform.Find("btn_TURBO").GetComponent<RectTransform>().anchoredPosition = new Vector2(-110, 65);
 
                 //Patch current slider and move it slightly above RANDOM_btn
                 BetterScrollSpeedSliderPatcher.PatchScrollSpeedSlider();
-                GameObject.Find("MainCanvas/FullScreenPanel/Slider").GetComponent<RectTransform>().anchoredPosition = new Vector2(-115, 23);
-                GameObject.Find("MainCanvas/FullScreenPanel/ScrollSpeedShad").GetComponent<RectTransform>().anchoredPosition = new Vector2(-112, 36);
+                _fullScreenPanelCanvas.transform.Find("Slider").GetComponent<RectTransform>().anchoredPosition = new Vector2(-115, 23);
+                _fullScreenPanelCanvas.transform.Find("ScrollSpeedShad").GetComponent<RectTransform>().anchoredPosition = new Vector2(-112, 36);
 
                 //Remove btn_TURBO + btn_PRACTICE and add GameSpeed slider
-                GameObject.Find("MainCanvas/FullScreenPanel/btn_TURBO").SetActive(false);
-                GameObject.Find("MainCanvas/FullScreenPanel/btn_PRACTICE").SetActive(false);
-                _gameSpeedSlider = GameObject.Instantiate(GameObject.Find("MainCanvas/FullScreenPanel/Slider").GetComponent<Slider>(), GameObject.Find("MainCanvas/FullScreenPanel").transform);
+                _fullScreenPanelCanvas.transform.Find("btn_TURBO").gameObject.SetActive(false);
+                _fullScreenPanelCanvas.transform.Find("btn_PRACTICE").gameObject.SetActive(false);
+                _gameSpeedSlider = GameObject.Instantiate(_fullScreenPanelCanvas.transform.Find("Slider").GetComponent<Slider>(), _fullScreenPanelCanvas.transform);
                 _gameSpeedSlider.gameObject.GetComponent<RectTransform>().anchoredPosition = new Vector2(-110, 65);
                 _gameSpeedSlider.wholeNumbers = true;
                 _gameSpeedSlider.minValue = 0;
                 _gameSpeedSlider.maxValue = 30;
                 _gameSpeedSlider.value = (Replays.ReplaySystemManager.gameSpeedMultiplier - .5f) / .05f;
 
-                GameObject gameSpeedText = GameObject.Instantiate(GameObject.Find("MainCanvas/FullScreenPanel/ScrollSpeedShad"), GameObject.Find("MainCanvas/FullScreenPanel").transform);
+                GameObject gameSpeedText = GameObject.Instantiate(_fullScreenPanelCanvas.transform.Find("ScrollSpeedShad").gameObject, _fullScreenPanelCanvas.transform);
                 gameSpeedText.name = "GameSpeedShad";
                 gameSpeedText.GetComponent<Text>().text = "Game Speed";
                 gameSpeedText.GetComponent<RectTransform>().anchoredPosition = new Vector2(-108, 78);
@@ -213,7 +216,7 @@ namespace TootTallyLeaderboard
                     _gameSpeedSlider.value = Mathf.Round(_value * 20) / 20f;
                     Replays.ReplaySystemManager.gameSpeedMultiplier = _gameSpeedSlider.value * .05f + .5f;
                     scrollSpeedSliderText.text = Replays.ReplaySystemManager.gameSpeedMultiplier.ToString("0.00");
-                    UpdateStarRating();
+                    UpdateStarRating(__instance);
                 });
 
                 GameObject titlebarPrefab = GameObject.Instantiate(_levelSelectControllerInstance.songtitlebar);
@@ -222,12 +225,11 @@ namespace TootTallyLeaderboard
                 titlebarPrefab.GetComponent<RectTransform>().localScale = Vector3.one;
                 titlebarPrefab.GetComponent<Image>().color = new Color(0, 0, 0, 0.001f);
 
-                GameObject fullScreenPanelCanvas = GameObject.Find("MainCanvas/FullScreenPanel");
 
-                GameObject ttHitbox = LeaderboardFactory.CreateDefaultPanel(fullScreenPanelCanvas.transform, new Vector2(381, -207), new Vector2(72, 72), "ProfilePopupHitbox");
+                GameObject ttHitbox = LeaderboardFactory.CreateDefaultPanel(_fullScreenPanelCanvas.transform, new Vector2(381, -207), new Vector2(72, 72), "ProfilePopupHitbox");
                 GameObjectFactory.CreateSingleText(ttHitbox.transform, "ProfilePopupHitboxText", "P", Color.white, GameObjectFactory.TextFont.Multicolore);
 
-                _profilePopup = LeaderboardFactory.CreateDefaultPanel(fullScreenPanelCanvas.transform, new Vector2(525, -300), new Vector2(450, 270), "TootTallyScorePanel");
+                _profilePopup = LeaderboardFactory.CreateDefaultPanel(_fullScreenPanelCanvas.transform, new Vector2(525, -300), new Vector2(450, 270), "TootTallyScorePanel");
                 _profilePopupLoadingSwirly = GameObjectFactory.CreateLoadingIcon(_profilePopup.transform, Vector2.zero, new Vector2(96, 96), AssetManager.GetSprite("icon.png"), true, "ProfilePopupLoadingSwirly");
                 _profilePopupLoadingSwirly.Show();
                 _profilePopupLoadingSwirly.StartRecursiveAnimation();
@@ -256,7 +258,7 @@ namespace TootTallyLeaderboard
                         TootTallyUser.userInfo.tt = user.tt;
 
                     var t = GameObjectFactory.CreateSingleText(mainPanel.transform, "NameLabel", $"{user.username} #{user.rank}", Color.white);
-                    var t2 = GameObjectFactory.CreateSingleText(mainPanel.transform, "TTLabel", $"{user.tt}tt (<color=\"green\">{(user.tt - TootTallyUser.userInfo.tt > 0?"+":"")}{user.tt - TootTallyUser.userInfo.tt:0.00}tt</color>)", Color.white);
+                    var t2 = GameObjectFactory.CreateSingleText(mainPanel.transform, "TTLabel", $"{user.tt}tt (<color=\"green\">{(user.tt - TootTallyUser.userInfo.tt > 0 ? "+" : "")}{user.tt - TootTallyUser.userInfo.tt:0.00}tt</color>)", Color.white);
                     _profilePopupLoadingSwirly.Dispose();
                 }));
 
@@ -268,8 +270,20 @@ namespace TootTallyLeaderboard
             }
         }
 
-        private void UpdateStarRating()
+        private void UpdateStarRating(LevelSelectController __instance)
         {
+            for (int i = 0; i < 10; i++)
+            {
+                if (!Plugin.Instance.option.ShowLeaderboard.Value && i >= __instance.alltrackslist[__instance.songindex].difficulty) break;
+                    __instance.diffstars[i].color = Color.white;
+
+                if (Plugin.Instance.option.ShowLeaderboard.Value)
+                {
+                    __instance.diffstars[i].gameObject.GetComponent<RectTransform>().anchoredPosition = new Vector2(i * 19, 0);
+                    __instance.diffstars[i].maskable = true;
+                }
+            }
+
 
             if (_songData != null && _speedToDiffDict != null)
             {
@@ -351,7 +365,7 @@ namespace TootTallyLeaderboard
                     }
                     else
                         _speedToDiffDict = null;
-                    UpdateStarRating();
+                    UpdateStarRating(__instance);
 
                     if (_scoreDataList != null)
                         CancelAndClearAllCoroutineInList();
