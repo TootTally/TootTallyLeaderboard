@@ -15,6 +15,7 @@ namespace TootTallyLeaderboard
     [BepInDependency("TootTallySettings", BepInDependency.DependencyFlags.HardDependency)]
     [BepInDependency("TootTallyAccounts", BepInDependency.DependencyFlags.HardDependency)]
     [BepInDependency("TootTallyGameModifiers", BepInDependency.DependencyFlags.HardDependency)]
+    [BepInDependency("TootTallyThemes", BepInDependency.DependencyFlags.SoftDependency)]
     public class Plugin : BaseUnityPlugin, ITootTallyModule
     {
         public static Plugin Instance;

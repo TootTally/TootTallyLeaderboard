@@ -49,5 +49,13 @@ namespace TootTallyLeaderboard
             hasBackground = !hasBackground;
             imageStrip.gameObject.SetActive(hasBackground);
         }
+
+        /*public void UpdateTheme(LeaderboardColors colors)
+        {
+            imageStrip.color = colors.rowEntry;
+            rank.color = colors.headerText;
+            username.color = score.color = percent.color = grade.color = maxcombo.color = colors.text;
+            rank.outlineColor = username.outlineColor = score.outlineColor = percent.outlineColor = grade.outlineColor = maxcombo.outlineColor = colors.textOutline;
+        }*/
     }
 }

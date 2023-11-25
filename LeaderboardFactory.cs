@@ -13,17 +13,49 @@ namespace TootTallyLeaderboard
         private static TMP_Text _leaderboardHeaderPrefab, _leaderboardTextPrefab;
         private static GameObject _steamLeaderboardPrefab, _singleScorePrefab, _panelBodyPrefab;
         private static LeaderboardRowEntry _singleRowPrefab;
+        private static bool _isInititialized;
 
         [HarmonyPatch(typeof(GameObjectFactory), nameof(GameObjectFactory.OnLevelSelectControllerInitialize))]
         [HarmonyPostfix]
         public static void OnLevelSelectStart(LevelSelectController levelSelectController)
         {
-            SetSteamLeaderboardPrefab();
-            SetSingleScorePrefab();
-            SetLeaderboardHeaderPrefab();
-            SetLeaderboardTextPrefab();
-            SetSingleRowPrefab();
+            if (!_isInititialized)
+            {
+                SetSteamLeaderboardPrefab();
+                SetSingleScorePrefab();
+                SetLeaderboardHeaderPrefab();
+                SetLeaderboardTextPrefab();
+                SetSingleRowPrefab();
+                _isInititialized = true;
+            }
+
+            /*if (OptionalTootTallyThemes.IsEnabled)
+                UpdateTheme();*/
         }
+
+        /*private static void UpdateTheme()
+        {
+            var colors = Theme.themeColors.leaderboard;
+
+            _panelBodyPrefab.GetComponent<Image>().color = colors.panelBody;
+            for (int i = 0; i < 3; i++)
+            {
+                GameObject currentTab = _steamLeaderboardPrefab.GetComponent<LeaderboardManager>().tabs[i];
+                ColorBlock colorblock = currentTab.transform.Find("Button").gameObject.GetComponent<Button>().colors;
+                colorblock.normalColor = colors.tabs.normalColor;
+                colorblock.pressedColor = colors.tabs.pressedColor;
+                colorblock.highlightedColor = colors.tabs.highlightedColor;
+                currentTab.transform.Find("Button").gameObject.GetComponent<Button>().colors = colorblock;
+            }
+
+            _panelBodyPrefab.transform.Find("scoresbody").gameObject.GetComponent<Image>().color = colors.scoresBody;
+            _singleRowPrefab.UpdateTheme(colors);
+
+            _leaderboardTextPrefab.color = colors.text;
+            _leaderboardTextPrefab.outlineColor = colors.textOutline;
+            _leaderboardHeaderPrefab.color = colors.headerText;
+            _leaderboardHeaderPrefab.outlineColor = colors.textOutline;
+        }*/
 
         private static void SetSteamLeaderboardPrefab()
         {

@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Remoting.Metadata.W3cXsd2001;
 using BaboonAPI.Hooks.Tracks;
-using HarmonyLib;
 using TMPro;
 using TootTallyAccounts;
 using TootTallyCore.APIServices;
@@ -275,7 +273,7 @@ namespace TootTallyLeaderboard
             for (int i = 0; i < 10; i++)
             {
                 if (!Plugin.Instance.option.ShowLeaderboard.Value && i >= __instance.alltrackslist[__instance.songindex].difficulty) break;
-                    __instance.diffstars[i].color = Color.white;
+                __instance.diffstars[i].color = Color.white;
 
                 if (Plugin.Instance.option.ShowLeaderboard.Value)
                 {
@@ -404,9 +402,12 @@ namespace TootTallyLeaderboard
             {
                 LeaderboardRowEntry rowEntry = LeaderboardFactory.CreateLeaderboardRowEntryFromScore(_scoreboard.transform, $"RowEntry{scoreData.player}", scoreData, count, gradeToColorDict[scoreData.grade], _levelSelectControllerInstance);
                 _scoreGameObjectList.Add(rowEntry);
-                if (scoreData.player == TootTallyAccounts.TootTallyUser.userInfo.username)
+                if (scoreData.player == TootTallyUser.userInfo.username)
                 {
-                    rowEntry.imageStrip.color = Color.gray;
+                    /*if (OptionalTootTallyThemes.IsEnabled)
+                        rowEntry.imageStrip.color = Theme.themeColors.leaderboard.yourRowEntry;
+                    else*/
+                    GameObjectFactory.TintImage(rowEntry.imageStrip, Color.white, .2f);
                     rowEntry.imageStrip.gameObject.SetActive(true);
                     _localScoreId = count - 1;
                 }
