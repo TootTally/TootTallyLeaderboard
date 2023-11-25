@@ -227,40 +227,43 @@ namespace TootTallyLeaderboard
                 GameObject ttHitbox = LeaderboardFactory.CreateDefaultPanel(_fullScreenPanelCanvas.transform, new Vector2(381, -207), new Vector2(72, 72), "ProfilePopupHitbox");
                 GameObjectFactory.CreateSingleText(ttHitbox.transform, "ProfilePopupHitboxText", "P", Color.white, GameObjectFactory.TextFont.Multicolore);
 
-                _profilePopup = LeaderboardFactory.CreateDefaultPanel(_fullScreenPanelCanvas.transform, new Vector2(525, -300), new Vector2(450, 270), "TootTallyScorePanel");
-                _profilePopupLoadingSwirly = GameObjectFactory.CreateLoadingIcon(_profilePopup.transform, Vector2.zero, new Vector2(96, 96), AssetManager.GetSprite("icon.png"), true, "ProfilePopupLoadingSwirly");
-                _profilePopupLoadingSwirly.Show();
-                _profilePopupLoadingSwirly.StartRecursiveAnimation();
-
-                var scoresbody = _profilePopup.transform.Find("scoresbody").gameObject;
-
-                HorizontalLayoutGroup horizontalLayoutGroup = scoresbody.AddComponent<HorizontalLayoutGroup>();
-                horizontalLayoutGroup.padding = new RectOffset(2, 2, 2, 2);
-                horizontalLayoutGroup.childAlignment = TextAnchor.MiddleCenter;
-                horizontalLayoutGroup.childForceExpandHeight = horizontalLayoutGroup.childForceExpandWidth = true;
-
-                GameObject mainPanel = GameObject.Instantiate(titlebarPrefab, scoresbody.transform);
-                VerticalLayoutGroup verticalLayoutGroup = mainPanel.AddComponent<VerticalLayoutGroup>();
-                verticalLayoutGroup.padding = new RectOffset(2, 2, 2, 2);
-                verticalLayoutGroup.childAlignment = TextAnchor.MiddleCenter;
-                verticalLayoutGroup.childForceExpandHeight = verticalLayoutGroup.childForceExpandWidth = true;
-
-                Plugin.Instance.StartCoroutine(TootTallyAPIService.GetUserFromID(TootTallyUser.userInfo.id, user =>
+                if (TootTallyUser.userInfo.id != 0)
                 {
-                    AssetManager.GetProfilePictureByID(user.id, sprite =>
+                    _profilePopup = LeaderboardFactory.CreateDefaultPanel(_fullScreenPanelCanvas.transform, new Vector2(525, -300), new Vector2(450, 270), "TootTallyScorePanel");
+                    _profilePopupLoadingSwirly = GameObjectFactory.CreateLoadingIcon(_profilePopup.transform, Vector2.zero, new Vector2(96, 96), AssetManager.GetSprite("icon.png"), true, "ProfilePopupLoadingSwirly");
+                    _profilePopupLoadingSwirly.Show();
+                    _profilePopupLoadingSwirly.StartRecursiveAnimation();
+
+                    var scoresbody = _profilePopup.transform.Find("scoresbody").gameObject;
+
+                    HorizontalLayoutGroup horizontalLayoutGroup = scoresbody.AddComponent<HorizontalLayoutGroup>();
+                    horizontalLayoutGroup.padding = new RectOffset(2, 2, 2, 2);
+                    horizontalLayoutGroup.childAlignment = TextAnchor.MiddleCenter;
+                    horizontalLayoutGroup.childForceExpandHeight = horizontalLayoutGroup.childForceExpandWidth = true;
+
+                    GameObject mainPanel = GameObject.Instantiate(titlebarPrefab, scoresbody.transform);
+                    VerticalLayoutGroup verticalLayoutGroup = mainPanel.AddComponent<VerticalLayoutGroup>();
+                    verticalLayoutGroup.padding = new RectOffset(2, 2, 2, 2);
+                    verticalLayoutGroup.childAlignment = TextAnchor.MiddleCenter;
+                    verticalLayoutGroup.childForceExpandHeight = verticalLayoutGroup.childForceExpandWidth = true;
+
+                    Plugin.Instance.StartCoroutine(TootTallyAPIService.GetUserFromID(TootTallyUser.userInfo.id, user =>
                     {
-                        var i = GameObjectFactory.CreateCustomButton(scoresbody.transform, Vector2.zero, new Vector2(sprite.rect.width, sprite.rect.height), sprite, false, "Pfp", OpenUserProfile);
-                        i.transform.SetSiblingIndex(0);
-                    });
-                    if (TootTallyUser.userInfo.tt == 0)
-                        TootTallyUser.userInfo.tt = user.tt;
+                        AssetManager.GetProfilePictureByID(user.id, sprite =>
+                        {
+                            var i = GameObjectFactory.CreateCustomButton(scoresbody.transform, Vector2.zero, new Vector2(sprite.rect.width, sprite.rect.height), sprite, false, "Pfp", OpenUserProfile);
+                            i.transform.SetSiblingIndex(0);
+                        });
+                        if (TootTallyUser.userInfo.tt == 0)
+                            TootTallyUser.userInfo.tt = user.tt;
 
-                    var t = GameObjectFactory.CreateSingleText(mainPanel.transform, "NameLabel", $"{user.username} #{user.rank}", Color.white);
-                    var t2 = GameObjectFactory.CreateSingleText(mainPanel.transform, "TTLabel", $"{user.tt}tt (<color=\"green\">{(user.tt - TootTallyUser.userInfo.tt > 0 ? "+" : "")}{user.tt - TootTallyUser.userInfo.tt:0.00}tt</color>)", Color.white);
-                    _profilePopupLoadingSwirly.Dispose();
-                }));
+                        var t = GameObjectFactory.CreateSingleText(mainPanel.transform, "NameLabel", $"{user.username} #{user.rank}", Color.white);
+                        var t2 = GameObjectFactory.CreateSingleText(mainPanel.transform, "TTLabel", $"{user.tt}tt (<color=\"green\">{(user.tt - TootTallyUser.userInfo.tt > 0 ? "+" : "")}{user.tt - TootTallyUser.userInfo.tt:0.00}tt</color>)", Color.white);
+                        _profilePopupLoadingSwirly.Dispose();
+                    }));
 
-                new SlideTooltip(ttHitbox, _profilePopup, new Vector2(525, -300), new Vector2(282, -155));
+                    new SlideTooltip(ttHitbox, _profilePopup, new Vector2(525, -300), new Vector2(282, -155));
+                }
             }
             catch (Exception e)
             {
