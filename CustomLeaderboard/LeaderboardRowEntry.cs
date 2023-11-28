@@ -1,4 +1,5 @@
 ﻿using TMPro;
+using TootTallyCore;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -50,12 +51,12 @@ namespace TootTallyLeaderboard
             imageStrip.gameObject.SetActive(hasBackground);
         }
 
-        /*public void UpdateTheme(LeaderboardColors colors)
+        public void UpdateTheme()
         {
-            imageStrip.color = colors.rowEntry;
-            rank.color = colors.headerText;
-            username.color = score.color = percent.color = grade.color = maxcombo.color = colors.text;
-            rank.outlineColor = username.outlineColor = score.outlineColor = percent.outlineColor = grade.outlineColor = maxcombo.outlineColor = colors.textOutline;
-        }*/
+            imageStrip.color = Theme.colors.leaderboard.rowEntry;
+            rank.color = Theme.colors.leaderboard.headerText;
+            username.color = score.color = percent.color = grade.color = maxcombo.color = Theme.colors.leaderboard.text;
+            rank.outlineColor = username.outlineColor = score.outlineColor = percent.outlineColor = grade.outlineColor = maxcombo.outlineColor = Theme.colors.leaderboard.textOutline;
+        }
     }
 }

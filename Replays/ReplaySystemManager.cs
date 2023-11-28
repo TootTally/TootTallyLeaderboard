@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using BaboonAPI.Hooks.Entrypoints;
 using BaboonAPI.Hooks.Tracks;
 using BepInEx;
 using HarmonyLib;
@@ -12,6 +14,7 @@ using TootTallyCore.Graphics.Animations;
 using TootTallyCore.Utils.Assets;
 using TootTallyCore.Utils.Helpers;
 using TootTallyCore.Utils.TootTallyNotifs;
+using TootTallyDiscordSDK.DiscordRichPresence;
 using TootTallyGameModifiers;
 using TootTallyLeaderboard.Compatibility;
 using TrombLoader.CustomTracks;
@@ -20,6 +23,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using UnityEngine.Video;
 using static TootTallyCore.APIServices.SerializableClass;
+using static TootTallyDiscordSDK.DiscordRichPresence.DiscordRPCManager;
 
 namespace TootTallyLeaderboard.Replays
 {
@@ -571,7 +575,7 @@ namespace TootTallyLeaderboard.Replays
                     SendReplayFileToServer();
             }
 
-            
+
         }
 
         public static bool ShouldSubmitReplay()
@@ -885,6 +889,16 @@ namespace TootTallyLeaderboard.Replays
             Recording,
             Replaying,
             Spectating
+        }
+
+        [BaboonEntryPoint]
+        public class DiscordRichPresenceEntryPoint : DiscordEntryPoints
+        {
+            override public void OnGameControllerStart()
+            {
+                if (wasPlayingReplay)
+                    SetActivity(GameStatus.InReplay);
+            }
         }
     }
 }

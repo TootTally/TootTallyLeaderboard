@@ -5,6 +5,7 @@ using TootTallyCore.Graphics;
 using TootTallyCore.APIServices;
 using TootTallyLeaderboard.Replays;
 using HarmonyLib;
+using TootTallyCore;
 
 namespace TootTallyLeaderboard
 {
@@ -17,7 +18,7 @@ namespace TootTallyLeaderboard
 
         [HarmonyPatch(typeof(GameObjectFactory), nameof(GameObjectFactory.OnLevelSelectControllerInitialize))]
         [HarmonyPostfix]
-        public static void OnLevelSelectStart(LevelSelectController levelSelectController)
+        public static void OnLevelSelectStart()
         {
             if (!_isInititialized)
             {
@@ -29,13 +30,12 @@ namespace TootTallyLeaderboard
                 _isInititialized = true;
             }
 
-            /*if (OptionalTootTallyThemes.IsEnabled)
-                UpdateTheme();*/
+            UpdateTheme();
         }
 
-        /*private static void UpdateTheme()
+        private static void UpdateTheme()
         {
-            var colors = Theme.themeColors.leaderboard;
+            var colors = Theme.colors.leaderboard;
 
             _panelBodyPrefab.GetComponent<Image>().color = colors.panelBody;
             for (int i = 0; i < 3; i++)
@@ -49,13 +49,13 @@ namespace TootTallyLeaderboard
             }
 
             _panelBodyPrefab.transform.Find("scoresbody").gameObject.GetComponent<Image>().color = colors.scoresBody;
-            _singleRowPrefab.UpdateTheme(colors);
+            _singleRowPrefab.UpdateTheme();
 
             _leaderboardTextPrefab.color = colors.text;
             _leaderboardTextPrefab.outlineColor = colors.textOutline;
             _leaderboardHeaderPrefab.color = colors.headerText;
             _leaderboardHeaderPrefab.outlineColor = colors.textOutline;
-        }*/
+        }
 
         private static void SetSteamLeaderboardPrefab()
         {

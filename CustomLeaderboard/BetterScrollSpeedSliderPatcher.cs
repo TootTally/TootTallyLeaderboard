@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using BepInEx;
 using BepInEx.Configuration;
+using TootTallyCore;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -42,6 +43,7 @@ namespace TootTallyLeaderboard
 
             Text yoinkText = GameObject.Find("MainCanvas/FullScreenPanel/ScrollSpeed-lbl").GetComponent<Text>();
             Transform handleTransform = GameObject.Find("MainCanvas/FullScreenPanel/Slider/Handle Slide Area/Handle").transform;
+            handleTransform.gameObject.GetComponent<Image>().color = Theme.colors.scrollSpeedSlider.handle;
 
             Transform starTransform = GameObject.Find("MainCanvas/FullScreenPanel/difficulty stars/star1").transform;
             Text scrollSpeedSliderText = GameObject.Instantiate(yoinkText, handleTransform);
@@ -50,8 +52,11 @@ namespace TootTallyLeaderboard
             scrollSpeedSliderText.alignment = TextAnchor.MiddleCenter;
             scrollSpeedSliderText.fontSize = 12;
             scrollSpeedSliderText.text = ((int)(GlobalVariables.gamescrollspeed * 100)).ToString();
+            scrollSpeedSliderText.color = Theme.colors.scrollSpeedSlider.text;
 
             Slider slider = GameObject.Find("MainCanvas/FullScreenPanel/Slider").GetComponent<Slider>();
+            slider.fillRect.gameObject.GetComponent<Image>().color = Theme.colors.scrollSpeedSlider.fill;
+            slider.transform.Find("Background").GetComponent<Image>().color = Theme.colors.scrollSpeedSlider.background;
             slider.minValue = option.Min.Value / 100f;
             slider.maxValue = option.Max.Value / 100f;
             slider.value = option.LastValue.Value / 100f;
@@ -64,8 +69,6 @@ namespace TootTallyLeaderboard
 
         public static string SliderValueToText(float value)
         {
-            //return Mathf.RoundToInt(value * 100).ToString();
-
             if (value >= 1)
                 return Mathf.FloorToInt(value * 100).ToString();
             else

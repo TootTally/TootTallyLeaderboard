@@ -4,6 +4,7 @@ using System.Linq;
 using BaboonAPI.Hooks.Tracks;
 using TMPro;
 using TootTallyAccounts;
+using TootTallyCore;
 using TootTallyCore.APIServices;
 using TootTallyCore.Graphics;
 using TootTallyCore.Graphics.Animations;
@@ -100,19 +101,19 @@ namespace TootTallyLeaderboard
             _loadingSwirly.Show();
 
             _slider = panelBody.transform.Find("LeaderboardVerticalSlider").gameObject.GetComponent<Slider>();
-            //_slider.transform.Find("Fill Area/Fill").GetComponent<Image>().color = GameTheme.themeColors.leaderboard.slider.fill;
-            //_slider.transform.Find("Background").GetComponent<Image>().color = GameTheme.themeColors.leaderboard.slider.background;
+            _slider.transform.Find("Fill Area/Fill").GetComponent<Image>().color = Theme.colors.leaderboard.slider.fill;
+            _slider.transform.Find("Background").GetComponent<Image>().color = Theme.colors.leaderboard.slider.background;
 
             _scrollableSliderHandler = _slider.gameObject.AddComponent<ScrollableSliderHandler>();
 
             _sliderHandle = _slider.transform.Find("Handle").gameObject;
-            //_sliderHandle.GetComponent<Image>().color = GameTheme.themeColors.leaderboard.slider.handle;
+            _sliderHandle.GetComponent<Image>().color = Theme.colors.leaderboard.slider.handle;
 
             SetOnSliderValueChangeEvent();
 
             GameObject diffBar = _fullScreenPanelCanvas.transform.Find("diff bar").gameObject;
             GameObject.DestroyImmediate(_fullScreenPanelCanvas.transform.Find("difficulty text").gameObject);
-            var t = GameObjectFactory.CreateSingleText(diffBar.transform, "Difficulty Text", "Difficulty:", Color.white, GameObjectFactory.TextFont.Multicolore);
+            var t = GameObjectFactory.CreateSingleText(diffBar.transform, "Difficulty Text", "Difficulty:", Theme.colors.leaderboard.text, GameObjectFactory.TextFont.Multicolore);
             t.alignment = TextAlignmentOptions.Left;
             t.margin = new Vector2(80, 4);
             t.fontSize = 16;
@@ -125,8 +126,8 @@ namespace TootTallyLeaderboard
             mask.showMaskGraphic = false;
             diffStarsHolder.AddComponent<Image>();
             diffBar.GetComponent<RectTransform>().sizeDelta += new Vector2(41.5f, 0);
-            _diffRating = GameObjectFactory.CreateSingleText(diffBar.transform, "diffRating", "", Color.white, GameObjectFactory.TextFont.Multicolore);
-            _diffRating.outlineColor = Color.black;
+            _diffRating = GameObjectFactory.CreateSingleText(diffBar.transform, "diffRating", "", Theme.colors.leaderboard.text, GameObjectFactory.TextFont.Multicolore);
+            _diffRating.outlineColor = Theme.colors.leaderboard.textOutline;
             _diffRating.outlineWidth = 0.2f;
             _diffRating.fontSize = 20;
             _diffRating.alignment = TextAlignmentOptions.MidlineRight;
@@ -225,7 +226,7 @@ namespace TootTallyLeaderboard
 
 
                 GameObject ttHitbox = LeaderboardFactory.CreateDefaultPanel(_fullScreenPanelCanvas.transform, new Vector2(381, -207), new Vector2(72, 72), "ProfilePopupHitbox");
-                GameObjectFactory.CreateSingleText(ttHitbox.transform, "ProfilePopupHitboxText", "P", Color.white, GameObjectFactory.TextFont.Multicolore);
+                GameObjectFactory.CreateSingleText(ttHitbox.transform, "ProfilePopupHitboxText", "P", Theme.colors.leaderboard.text, GameObjectFactory.TextFont.Multicolore);
 
                 if (TootTallyUser.userInfo.id != 0)
                 {
@@ -257,8 +258,8 @@ namespace TootTallyLeaderboard
                         if (TootTallyUser.userInfo.tt == 0)
                             TootTallyUser.userInfo.tt = user.tt;
 
-                        var t = GameObjectFactory.CreateSingleText(mainPanel.transform, "NameLabel", $"{user.username} #{user.rank}", Color.white);
-                        var t2 = GameObjectFactory.CreateSingleText(mainPanel.transform, "TTLabel", $"{user.tt}tt (<color=\"green\">{(user.tt - TootTallyUser.userInfo.tt > 0 ? "+" : "")}{user.tt - TootTallyUser.userInfo.tt:0.00}tt</color>)", Color.white);
+                        var t = GameObjectFactory.CreateSingleText(mainPanel.transform, "NameLabel", $"{user.username} #{user.rank}", Theme.colors.leaderboard.text);
+                        var t2 = GameObjectFactory.CreateSingleText(mainPanel.transform, "TTLabel", $"{user.tt}tt (<color=\"green\">{(user.tt - TootTallyUser.userInfo.tt > 0 ? "+" : "")}{user.tt - TootTallyUser.userInfo.tt:0.00}tt</color>)", Theme.colors.leaderboard.text);
                         _profilePopupLoadingSwirly.Dispose();
                     }));
 
@@ -276,7 +277,11 @@ namespace TootTallyLeaderboard
             for (int i = 0; i < 10; i++)
             {
                 if (!Plugin.Instance.option.ShowLeaderboard.Value && i >= __instance.alltrackslist[__instance.songindex].difficulty) break;
-                __instance.diffstars[i].color = Color.white;
+
+                if (!Theme.isDefault)
+                    __instance.diffstars[i].color = Color.Lerp(Theme.colors.diffStar.gradientStart, Theme.colors.diffStar.gradientEnd, i / 9f);
+                else
+                    __instance.diffstars[i].color = Color.white;
 
                 if (Plugin.Instance.option.ShowLeaderboard.Value)
                 {
@@ -410,10 +415,7 @@ namespace TootTallyLeaderboard
                 _scoreGameObjectList.Add(rowEntry);
                 if (scoreData.player == TootTallyUser.userInfo.username)
                 {
-                    /*if (OptionalTootTallyThemes.IsEnabled)
-                        rowEntry.imageStrip.color = Theme.themeColors.leaderboard.yourRowEntry;
-                    else*/
-                    GameObjectFactory.TintImage(rowEntry.imageStrip, Color.white, .2f);
+                    rowEntry.imageStrip.color = Theme.colors.leaderboard.yourRowEntry;
                     rowEntry.imageStrip.gameObject.SetActive(true);
                     _localScoreId = count - 1;
                 }
@@ -479,7 +481,7 @@ namespace TootTallyLeaderboard
         public void ScrollToLocalScore()
         {
             if (_localScoreId == -1)
-                TootTallyNotifManager.DisplayNotif("You don't have a score on that leaderboard yet", Color.white);
+                TootTallyNotifManager.DisplayNotif("You don't have a score on that leaderboard yet");
             else if (_scoreGameObjectList.Count > 8)
             {
                 _slider.value = _localScoreId / (_scoreGameObjectList.Count - 8f);
