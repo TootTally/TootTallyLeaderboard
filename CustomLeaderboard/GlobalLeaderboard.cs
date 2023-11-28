@@ -340,30 +340,7 @@ namespace TootTallyLeaderboard
                 _currentLeaderboardCoroutines.Add(TootTallyAPIService.GetSongDataFromDB(songHashInDB, songData =>
                 {
                     if (songData != null)
-                    {
-                        _songData = songData;
-                        _speedToDiffDict = new Dictionary<int, float>();
-                        if (songData.is_rated)
-                        {
-                            _ratedIcon.SetActive(true);
-                            for (int i = 0; i <= 29; i++)
-                            {
-                                float diffIndex = (int)(i / 5f);
-                                float diffMin = diffIndex * .25f + .5f;
-                                float diffMax = (diffIndex + 1f) * .25f + .5f;
-                                float currentGameSpeed = i * .05f + .5f;
-
-                                float by = (currentGameSpeed - diffMin) / (diffMax - diffMin);
-
-                                float diff = EasingHelper.Lerp(_songData.speed_diffs[(int)diffIndex], _songData.speed_diffs[(int)diffIndex + 1], by);
-
-                                _speedToDiffDict.Add(i, diff);
-                            }
-                            _speedToDiffDict.Add(30, _songData.speed_diffs.Last());
-                        }
-                        else
-                            _speedToDiffDict.Add(1, _songData.difficulty);
-                    }
+                        OnSongInfoReceived(songData);
                     else
                         _speedToDiffDict = null;
                     UpdateStarRating(__instance);
@@ -392,6 +369,32 @@ namespace TootTallyLeaderboard
                 Plugin.Instance.StartCoroutine(_currentLeaderboardCoroutines.Last());
             }));
             Plugin.Instance.StartCoroutine(_currentLeaderboardCoroutines.Last());
+        }
+
+        public static void OnSongInfoReceived(SerializableClass.SongDataFromDB songData)
+        {
+            _songData = songData;
+            _speedToDiffDict = new Dictionary<int, float>();
+            if (songData.is_rated)
+            {
+                _ratedIcon.SetActive(true);
+                for (int i = 0; i <= 29; i++)
+                {
+                    float diffIndex = (int)(i / 5f);
+                    float diffMin = diffIndex * .25f + .5f;
+                    float diffMax = (diffIndex + 1f) * .25f + .5f;
+                    float currentGameSpeed = i * .05f + .5f;
+
+                    float by = (currentGameSpeed - diffMin) / (diffMax - diffMin);
+
+                    float diff = EasingHelper.Lerp(_songData.speed_diffs[(int)diffIndex], _songData.speed_diffs[(int)diffIndex + 1], by);
+
+                    _speedToDiffDict.Add(i, diff);
+                }
+                _speedToDiffDict.Add(30, _songData.speed_diffs.Last());
+            }
+            else
+                _speedToDiffDict.Add(1, _songData.difficulty);
         }
 
         public void ShowLoadingSwirly() => _loadingSwirly.Show();
