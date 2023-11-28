@@ -371,7 +371,7 @@ namespace TootTallyLeaderboard
             Plugin.Instance.StartCoroutine(_currentLeaderboardCoroutines.Last());
         }
 
-        public static void OnSongInfoReceived(SerializableClass.SongDataFromDB songData)
+        public void OnSongInfoReceived(SerializableClass.SongDataFromDB songData)
         {
             _songData = songData;
             _speedToDiffDict = new Dictionary<int, float>();
