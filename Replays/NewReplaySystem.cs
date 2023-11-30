@@ -18,7 +18,7 @@ namespace TootTallyLeaderboard.Replays
     public class NewReplaySystem
     {
         public static List<string> incompatibleReplayVersions = new List<string> { "1.0.0" };
-        public const string REPLAY_VERSION = "2.0.0";
+        public const string REPLAY_VERSION = "2.0.1";
 
         private int _frameIndex, _tootIndex;
 
@@ -69,6 +69,15 @@ namespace TootTallyLeaderboard.Replays
             _currentToot = new dynamic[3];
             Plugin.LogInfo("Started recording replay");
         }
+
+        public void SetReplayDefaultNoteLength(int spacing)
+        {
+            _replayData.defaultnotelength = spacing;
+        }
+
+        public int GetDefaultNoteLength() => _replayData.defaultnotelength;
+
+        public string GetVersion => _replayData.version;
 
         public void SetStartTime()
         {
@@ -222,8 +231,7 @@ namespace TootTallyLeaderboard.Replays
 
             var replayVersion = JsonConvert.DeserializeObject<ReplayVersion>(jsonFileFromZip).version;
             _replayData = JsonConvert.DeserializeObject<ReplayData>(jsonFileFromZip);
-            _isOldReplay = replayVersion == null || IsOldReplayVersion(replayVersion);
-            if (_isOldReplay)
+            if (IsOldReplayFormat(replayVersion))
                 ConvertToCurrentReplayVersion(ref _replayData);
 
             if (incompatibleReplayVersions.Contains(_replayData.pluginbuilddate.ToString()))
@@ -240,7 +248,7 @@ namespace TootTallyLeaderboard.Replays
             return ReplayState.ReplayLoadSuccess;
         }
 
-        private bool IsOldReplayVersion(string version) => string.Compare(version, REPLAY_VERSION) < 0;
+        private bool IsOldReplayFormat(string version) => version == null || string.Compare(version, "2.0.0") < 0;
 
         private void ConvertToCurrentReplayVersion(ref ReplayData replayData)
         {
@@ -321,10 +329,14 @@ namespace TootTallyLeaderboard.Replays
         {
             if (_currentFrame[(int)FDStruct.T] - _lastFrame[(int)FDStruct.T] > 0)
             {
-                var newCursorPosition = EasingHelper.Lerp((float)_lastFrame[(int)FDStruct.P], (float)_currentFrame[(int)FDStruct.P], (float)((time - (float)_lastFrame[(int)FDStruct.T]) / ((float)_currentFrame[(int)FDStruct.T] - (float)_lastFrame[(int)FDStruct.T])));
+                var by = (time - (float)_lastFrame[(int)FDStruct.T]) / ((float)_currentFrame[(int)FDStruct.T] - (float)_lastFrame[(int)FDStruct.T]);
+                var newCursorPosition = EasingHelper.Lerp((float)_lastFrame[(int)FDStruct.P], (float)_currentFrame[(int)FDStruct.P], by);
+
                 SetCursorPosition(__instance, newCursorPosition);
                 __instance.puppet_humanc.doPuppetControl(-newCursorPosition / 225); //225 is half of the Gameplay area:450
             }
+            else
+                SetCursorPosition(__instance, (float)_currentFrame[(int)FDStruct.P]);
         }
 
         private void PlaybackTimeFrameData(float time)
@@ -418,6 +430,7 @@ namespace TootTallyLeaderboard.Replays
             public string uuid { get; set; }
             public float samplerate { get; set; }
             public float scrollspeed { get; set; }
+            public int defaultnotelength { get; set; }
             public float gamespeedmultiplier { get; set; }
             public string gamemodifiers { get; set; }
             public float audiolatency { get; set; }

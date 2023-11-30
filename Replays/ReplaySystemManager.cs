@@ -14,7 +14,6 @@ using TootTallyCore.Graphics.Animations;
 using TootTallyCore.Utils.Assets;
 using TootTallyCore.Utils.Helpers;
 using TootTallyCore.Utils.TootTallyNotifs;
-using TootTallyDiscordSDK.DiscordRichPresence;
 using TootTallyGameModifiers;
 using TootTallyLeaderboard.Compatibility;
 using TrombLoader.CustomTracks;
@@ -23,7 +22,6 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using UnityEngine.Video;
 using static TootTallyCore.APIServices.SerializableClass;
-using static TootTallyDiscordSDK.DiscordRichPresence.DiscordRPCManager;
 
 namespace TootTallyLeaderboard.Replays
 {
@@ -43,6 +41,7 @@ namespace TootTallyLeaderboard.Replays
 
         private static string _replayUUID;
         private static string _replayFileName;
+        private static float _replayTracktime;
 
         private static NewReplaySystem _replay;
         private static ReplayManagerState _replayManagerState;
@@ -104,6 +103,22 @@ namespace TootTallyLeaderboard.Replays
 
             _pausePointerAnimation = new SecondDegreeDynamicsAnimation(2.5f, 1f, 0.85f);
 
+        }
+
+        [HarmonyPatch(typeof(GameController), nameof(GameController.buildNotes))]
+        [HarmonyPrefix]
+        public static void OnBuildNoteSaveNoteSpacing(GameController __instance)
+        {
+            switch (_replayManagerState)
+            {
+                case ReplayManagerState.Recording:
+                    _replay.SetReplayDefaultNoteLength(__instance.defaultnotelength);
+                    break;
+                case ReplayManagerState.Replaying:
+                    /*if (_replay.GetVersion.CompareTo("2.0.1") >= 0)
+                        __instance.defaultnotelength = _replay.GetDefaultNoteLength();*/
+                    break;
+            }
         }
 
         [HarmonyPatch(typeof(GameController), nameof(GameController.playsong))]
@@ -329,12 +344,27 @@ namespace TootTallyLeaderboard.Replays
                     }
                     break;
                 case ReplayManagerState.Replaying:
-                    if (!_hasRewindReplay && !__instance.retrying) //have to skip a frame when rewinding because dev is using LeanTween to move the play area... and it only updates on the second frame after rewinding :|
-                        _replay.PlaybackReplay(__instance, __instance.musictrack.time);
+                    if (!_hasRewindReplay && !__instance.retrying && _replayTracktime != 0) //have to skip a frame when rewinding because dev is using LeanTween to move the play area... and it only updates on the second frame after rewinding :|
+                    {
+                        _replayTracktime += Time.deltaTime * gameSpeedMultiplier;
+                        _replay.PlaybackReplay(__instance, _replayTracktime);
+                    }
+                    else if (_replayTracktime == 0)
+                        SyncMusictrackTimeDuringReplay(__instance);
+
                     _hasRewindReplay = false;
                     break;
             }
         }
+
+        [HarmonyPatch(typeof(GameController), nameof(GameController.syncTrackPositions))]
+        [HarmonyPrefix]
+        public static void SyncMusictrackTimeDuringReplay(GameController __instance)
+        {
+            if (wasPlayingReplay)
+                _replayTracktime = __instance.musictrack.time;
+        }
+
         [HarmonyPatch(typeof(GameController), nameof(GameController.doScoreText))]
         [HarmonyPostfix]
         public static void OnDoScoreSaveLastTally(object[] __args)
@@ -558,6 +588,7 @@ namespace TootTallyLeaderboard.Replays
 
         public static void OnReplayingStart()
         {
+            _replayTracktime = 0;
             _replay.OnReplayPlayerStart();
             _lastIsTooting = _hasRewindReplay = false;
             _replayManagerState = ReplayManagerState.Replaying;
@@ -889,16 +920,6 @@ namespace TootTallyLeaderboard.Replays
             Recording,
             Replaying,
             Spectating
-        }
-
-        [BaboonEntryPoint]
-        public class DiscordRichPresenceEntryPoint : DiscordEntryPoints
-        {
-            override public void OnGameControllerStart()
-            {
-                if (wasPlayingReplay)
-                    SetActivity(GameStatus.InReplay);
-            }
         }
     }
 }
