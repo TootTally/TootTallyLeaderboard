@@ -182,7 +182,7 @@ namespace TootTallyLeaderboard.Replays
         [HarmonyPostfix]
         public static void OnFixAudioMixerStuffPostFix(GameController __instance)
         {
-            if (gameSpeedMultiplier != 1f && !Plugin.Instance.option.ChangePitchSpeed.Value && Plugin.Instance.option.ShowLeaderboard.Value)
+            if (!Plugin.Instance.option.ChangePitchSpeed.Value && Plugin.Instance.option.ShowLeaderboard.Value)
             {
                 __instance.musictrack.outputAudioMixerGroup = __instance.audmix_bgmus_pitchshifted;
                 __instance.audmix.SetFloat("pitchShifterMult", 1f / gameSpeedMultiplier);
@@ -193,7 +193,7 @@ namespace TootTallyLeaderboard.Replays
         [HarmonyPostfix]
         public static void OnGameControllerStartDanceFixSpeedBackup(GameController __instance)
         {
-            if (gameSpeedMultiplier != 1f && __instance.musictrack.pitch != gameSpeedMultiplier && Plugin.Instance.option.ShowLeaderboard.Value)
+            if (__instance.musictrack.pitch != gameSpeedMultiplier && Plugin.Instance.option.ShowLeaderboard.Value)
             {
                 __instance.smooth_scrolling_move_mult = gameSpeedMultiplier;
                 __instance.musictrack.pitch = gameSpeedMultiplier;
@@ -230,6 +230,7 @@ namespace TootTallyLeaderboard.Replays
             {
                 case ReplayManagerState.Recording:
                     OnRecordingStop();
+                    _replayFileName = null;
                     break;
                 case ReplayManagerState.Replaying:
                     GameModifierManager.LoadBackedupModifiers();
@@ -276,8 +277,6 @@ namespace TootTallyLeaderboard.Replays
             _loadingSwirly = GameObjectFactory.CreateLoadingIcon(panelBody.transform, Vector2.zero, new Vector2(128, 128), AssetManager.GetSprite("icon.png"), true, "LoadingSwirly");
             _loadingSwirly.Show();
             _loadingSwirly.StartRecursiveAnimation();
-
-
 
             new SlideTooltip(ttHitbox, panelBody, new Vector2(750, 0), new Vector2(225, 0));
 
