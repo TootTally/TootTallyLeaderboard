@@ -231,7 +231,8 @@ namespace TootTallyLeaderboard.Replays
 
             var replayVersion = JsonConvert.DeserializeObject<ReplayVersion>(jsonFileFromZip).version;
             _replayData = JsonConvert.DeserializeObject<ReplayData>(jsonFileFromZip);
-            if (IsOldReplayFormat(replayVersion))
+            _isOldReplay = IsOldReplayFormat(replayVersion);
+            if (_isOldReplay)
                 ConvertToCurrentReplayVersion(ref _replayData);
 
             if (incompatibleReplayVersions.Contains(_replayData.pluginbuilddate.ToString()))

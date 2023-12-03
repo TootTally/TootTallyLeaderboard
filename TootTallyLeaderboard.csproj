@@ -8,7 +8,7 @@
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<LangVersion>latest</LangVersion>
 		<TromboneChampDir>E:\SteamLibrary\steamapps\common\TromboneChamp</TromboneChampDir>
-		<TromboneTootDir>C:\Users\Sabz\AppData\Roaming\r2modmanPlus-local\TromboneChamp\profiles\TTCoreTesting</TromboneTootDir>
+		<TromboneTootDir>C:\Users\Sabz\AppData\Roaming\r2modmanPlus-local\TromboneChamp\profiles\Default</TromboneTootDir>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -28,23 +28,23 @@
 
 	<ItemGroup>
 		<Reference Include="TootTallyCore">
-			<HintPath>$(TromboneTootDir)\BepInEx\plugins\TootTally-Core\TootTallyCore.dll</HintPath>
+			<HintPath>$(TromboneTootDir)\BepInEx\plugins\TootTally-TootTallyCore\TootTallyCore.dll</HintPath>
 		</Reference>
 		<Reference Include="TootTallySettings">
-			<HintPath>$(TromboneTootDir)\BepInEx\plugins\TootTally-Settings\TootTallySettings.dll</HintPath>
+			<HintPath>$(TromboneTootDir)\BepInEx\plugins\TootTally-TootTallySettings\TootTallySettings.dll</HintPath>
 		</Reference>
 		<Reference Include="TootTallyAccounts">
-			<HintPath>$(TromboneTootDir)\BepInEx\plugins\TootTally-Accounts\TootTallyAccounts.dll</HintPath>
+			<HintPath>$(TromboneTootDir)\BepInEx\plugins\TootTally-TootTallyAccounts\TootTallyAccounts.dll</HintPath>
 		</Reference>
 		<Reference Include="TootTallyGameModifiers">
-			<HintPath>$(TromboneTootDir)\BepInEx\plugins\TootTally-GameModifiers\TootTallyGameModifiers.dll</HintPath>
+			<HintPath>$(TromboneTootDir)\BepInEx\plugins\TootTally-TootTallyGameModifiers\TootTallyGameModifiers.dll</HintPath>
 		</Reference>
 		<Reference Include="TootTallyDiscordSDK">
-			<HintPath>$(TromboneTootDir)\BepInEx\plugins\TootTally-DiscordSDK\TootTallyDiscordSDK.dll</HintPath>
+			<HintPath>$(TromboneTootDir)\BepInEx\plugins\TootTally-TootTallyDiscordSDK\TootTallyDiscordSDK.dll</HintPath>
 		</Reference>
 	</ItemGroup>
 
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
-		<Copy SourceFiles="$(TargetPath)" DestinationFolder="$(TromboneTootDir)\BepInEx\plugins\TootTally-Leaderboard" />
+		<Copy SourceFiles="$(TargetPath)" DestinationFolder="$(TromboneTootDir)\BepInEx\plugins\TootTally-TootTallyLeaderboard" />
 	</Target>
 </Project>
