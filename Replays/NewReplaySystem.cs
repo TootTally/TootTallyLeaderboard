@@ -314,7 +314,7 @@ namespace TootTallyLeaderboard.Replays
                 time = (_replayData.pluginbuilddate < 20230705 ?
                  Math.Abs(__instance.noteholder.transform.position.x) : Math.Abs(__instance.noteholderr.anchoredPosition.x)) * GetNoteHolderPrecisionMultiplier();
             else
-                time = time + ((_replayData.audiolatency / 1000f) - (__instance.latency_offset / 1000f));
+                time = time + (_replayData.audiolatency / 1000f) * _replayData.gamespeedmultiplier;
             PlaybackTimeFrameData(time);
             PlaybackTimeTootData(time);
             if (_replayData.framedata.Count > _frameIndex && _lastFrame != null && _currentFrame != null)
