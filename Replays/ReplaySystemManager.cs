@@ -145,32 +145,36 @@ namespace TootTallyLeaderboard.Replays
         [HarmonyPostfix]
         public static void OnSetUpBGControllerRefsDelayedPostFix(BGController __instance)
         {
+            try
+            {
+                GameObject bgObj = GameObject.Find("BGCameraObj").gameObject;
+                _videoPlayer = bgObj.GetComponentInChildren<VideoPlayer>();
+            }
+            catch (Exception e)
+            {
+                Plugin.LogWarning(e.ToString());
+                Plugin.LogWarning("Couldn't find VideoPlayer in background");
+            }
+
             if (_replayManagerState == ReplayManagerState.Replaying)
             {
-                try
+                if (_videoPlayer != null)
                 {
-                    GameObject bgObj = GameObject.Find("BGCameraObj").gameObject;
-                    _videoPlayer = bgObj.GetComponentInChildren<VideoPlayer>();
-                    if (_videoPlayer != null)
+                    _replaySpeedSlider.onValueChanged.AddListener((float value) =>
                     {
-                        _replaySpeedSlider.onValueChanged.AddListener((float value) =>
-                        {
-                            _videoPlayer.playbackSpeed = value;
-                        });
-                        _replayTimestampSlider.onValueChanged.AddListener((float value) =>
-                        {
-                            _videoPlayer.time = _videoPlayer.length * value;
-                        });
-                    }
-                }
-                catch (Exception e)
-                {
-                    Plugin.LogInfo(e.ToString());
-                    Plugin.LogInfo("Couldn't find VideoPlayer in background");
+                        _videoPlayer.playbackSpeed = value;
+                    });
+                    _replayTimestampSlider.onValueChanged.AddListener((float value) =>
+                    {
+                        _videoPlayer.time = _videoPlayer.length * value;
+                    });
                 }
             }
             else if (Plugin.Instance.option.ShowLeaderboard.Value)
             {
+                if (_videoPlayer != null)
+                    _videoPlayer.playbackSpeed = gameSpeedMultiplier;
+
                 //Have to set the speed here because the pitch is changed in 2 different places? one time during GC.Start and one during GC.loadAssetBundleResources... Derp
                 _currentGCInstance.smooth_scrolling_move_mult = gameSpeedMultiplier;
                 _currentGCInstance.musictrack.pitch = gameSpeedMultiplier; // SPEEEEEEEEEEEED
