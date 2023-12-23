@@ -65,6 +65,11 @@ namespace TootTallyLeaderboard.Replays
         public static void GameControllerPrefixPatch(GameController __instance)
         {
             wasPlayingReplay = _replayFileName != null && _replayFileName != "Spectating";
+            if (_replay == null)
+            {
+                _replayManagerState = ReplayManagerState.None;
+                _replay = new NewReplaySystem();
+            }
         }
 
         [HarmonyPatch(typeof(GameController), nameof(GameController.Start))]
@@ -515,16 +520,6 @@ namespace TootTallyLeaderboard.Replays
                 _replay.ClearData();
         }
 
-        [HarmonyPatch(typeof(HomeController), nameof(HomeController.Start))]
-        [HarmonyPostfix]
-        public static void OnHomeControllerStart()
-        {
-            if (_replay == null)
-            {
-                _replayManagerState = ReplayManagerState.None;
-                _replay = new NewReplaySystem();
-            }
-        }
 
         [HarmonyPatch(typeof(LevelSelectController), nameof(LevelSelectController.Start))]
         [HarmonyPostfix]
