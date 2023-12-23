@@ -176,9 +176,13 @@ namespace TootTallyLeaderboard.Replays
                     _videoPlayer.playbackSpeed = gameSpeedMultiplier;
 
                 //Have to set the speed here because the pitch is changed in 2 different places? one time during GC.Start and one during GC.loadAssetBundleResources... Derp
-                _currentGCInstance.smooth_scrolling_move_mult = gameSpeedMultiplier;
-                _currentGCInstance.musictrack.pitch = gameSpeedMultiplier; // SPEEEEEEEEEEEED
-                Plugin.LogInfo("GameSpeed set to " + gameSpeedMultiplier);
+                if (_currentGCInstance != null)
+                {
+                    _currentGCInstance.smooth_scrolling_move_mult = gameSpeedMultiplier;
+                    _currentGCInstance.musictrack.pitch = gameSpeedMultiplier; // SPEEEEEEEEEEEED
+                    Plugin.LogInfo("GameSpeed set to " + gameSpeedMultiplier);
+                }
+                
             }
         }
 
@@ -511,17 +515,22 @@ namespace TootTallyLeaderboard.Replays
                 _replay.ClearData();
         }
 
+        [HarmonyPatch(typeof(HomeController), nameof(HomeController.Start))]
+        [HarmonyPostfix]
+        public static void OnHomeControllerStart()
+        {
+            if (_replay == null)
+            {
+                _replayManagerState = ReplayManagerState.None;
+                _replay = new NewReplaySystem();
+            }
+        }
+
         [HarmonyPatch(typeof(LevelSelectController), nameof(LevelSelectController.Start))]
         [HarmonyPostfix]
         public static void OnLevelselectControllerStartInstantiateReplay(LevelSelectController __instance)
         {
             _currentLevelSelectInstance = __instance;
-            if (_replay == null)
-            {
-                _replayManagerState = ReplayManagerState.None;
-                _replay = new NewReplaySystem();
-                gameSpeedMultiplier = 1f;
-            }
         }
 
         #endregion
