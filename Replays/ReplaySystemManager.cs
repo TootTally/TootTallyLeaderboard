@@ -192,14 +192,19 @@ namespace TootTallyLeaderboard.Replays
         }
 
         [HarmonyPatch(typeof(GameController), nameof(GameController.fixAudioMixerStuff))]
-        [HarmonyPostfix]
-        public static void OnFixAudioMixerStuffPostFix(GameController __instance)
+        [HarmonyPrefix]
+        public static bool OnFixAudioMixerStuffPostFix(GameController __instance)
         {
             if (!Plugin.Instance.option.ChangePitchSpeed.Value && Plugin.Instance.option.ShowLeaderboard.Value)
             {
                 __instance.musictrack.outputAudioMixerGroup = __instance.audmix_bgmus_pitchshifted;
                 __instance.audmix.SetFloat("pitchShifterMult", 1f / gameSpeedMultiplier);
+                __instance.audmix.SetFloat("mastervol", Mathf.Log10(GlobalVariables.localsettings.maxvolume) * 40f);
+                __instance.audmix.SetFloat("trombvol", Mathf.Log10(GlobalVariables.localsettings.maxvolume_tromb) * 60f + 12f);
+                __instance.audmix.SetFloat("airhornvol", (GlobalVariables.localsettings.maxvolume_airhorn - 1f) * 80f);
+                return false;
             }
+            return true;
         }
 
         [HarmonyPatch(typeof(GameController), nameof(GameController.startDance))]
