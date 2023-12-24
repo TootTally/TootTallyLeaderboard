@@ -537,6 +537,7 @@ namespace TootTallyLeaderboard.Replays
 
         public static NewReplaySystem.ReplayState ResolveLoadReplay(string replayId, LevelSelectController levelSelectControllerInstance)
         {
+            _replay ??= new NewReplaySystem();
             _replay.ClearData();
             NewReplaySystem.ReplayState replayState = _replay.LoadReplay(replayId);
             switch (replayState)
