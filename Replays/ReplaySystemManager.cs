@@ -207,6 +207,14 @@ namespace TootTallyLeaderboard.Replays
             return true;
         }
 
+        [HarmonyPatch(typeof(GameController), nameof(GameController.buildNotes))]
+        [HarmonyPrefix]
+        public static void FixAudioLatency(GameController __instance)
+        {
+            if (GlobalVariables.practicemode == 1 && !GlobalVariables.turbomode)
+                __instance.latency_offset = GlobalVariables.localsettings.latencyadjust * 0.001f * ReplaySystemManager.gameSpeedMultiplier;
+        }
+
         [HarmonyPatch(typeof(GameController), nameof(GameController.startDance))]
         [HarmonyPostfix]
         public static void OnGameControllerStartDanceFixSpeedBackup(GameController __instance)
