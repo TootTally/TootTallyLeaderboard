@@ -13,7 +13,7 @@ namespace TootTallyLeaderboard
 
         [HarmonyPatch(typeof(LevelSelectController), nameof(LevelSelectController.Start))]
         [HarmonyPostfix]
-        static void OnLevelSelectControllerStartPostfix(List<SingleTrackData> ___alltrackslist, LevelSelectController __instance)
+        public static void OnLevelSelectControllerStartPostfix(List<SingleTrackData> ___alltrackslist, LevelSelectController __instance)
         {
             _hasLeaderboardFinishedLoading = false;
             if (!Plugin.Instance.option.ShowLeaderboard.Value)
