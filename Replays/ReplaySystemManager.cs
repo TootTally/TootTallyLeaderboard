@@ -693,7 +693,7 @@ namespace TootTallyLeaderboard.Replays
 
             try
             {
-                FileHelper.WriteJsonToFile(replayDir + "\\", _replayUUID + ".ttr", _replay.GetRecordedReplayJson(_replayUUID));
+                FileHelper.WriteJsonToFile(replayDir + "/", _replayUUID + ".ttr", _replay.GetRecordedReplayJson(_replayUUID));
             }
             catch (Exception e)
             {
