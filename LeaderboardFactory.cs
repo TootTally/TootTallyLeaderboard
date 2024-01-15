@@ -6,6 +6,8 @@ using TootTallyCore.APIServices;
 using TootTallyLeaderboard.Replays;
 using HarmonyLib;
 using TootTallyCore;
+using TootTallyCore.Utils.Assets;
+using System.Linq;
 
 namespace TootTallyLeaderboard
 {
@@ -264,7 +266,21 @@ namespace TootTallyLeaderboard
             rowEntry.name = name;
             rowEntry.username.text = scoreData.player;
             rowEntry.score.text = string.Format("{0:n0}", scoreData.score) + $" ({scoreData.replay_speed:0.00}x)";
-            rowEntry.score.gameObject.AddComponent<BubblePopupHandler>().Initialize(GameObjectFactory.CreateBubble(new Vector2(175, 200), $"{rowEntry.name}ScoreBubble", GetTallyBubbleText(scoreData.GetTally), 10, false));
+            var bubble = GameObjectFactory.CreateBubble(new Vector2(175, 200), $"{rowEntry.name}ScoreBubble", GetTallyBubbleText(scoreData.GetTally), 10, false);
+            if (scoreData.modifiers != null && !scoreData.modifiers.Contains("NONE"))
+            {
+                rowEntry.score.text += "*";
+                var hObj = GameObject.Instantiate(new GameObject("HorizontalLayout", typeof(HorizontalLayoutGroup)), bubble.transform.Find("Window Body"));
+                var layout = hObj.GetComponent<HorizontalLayoutGroup>();
+                layout.childControlHeight = layout.childForceExpandHeight = false;
+                var rect = hObj.GetComponent<RectTransform>();
+                rect.anchorMin = rect.anchorMax = new Vector2(.5f, 0);
+                bubble.transform.Find("Window Body/BubbleText").GetComponent<TMP_Text>().rectTransform.sizeDelta = new Vector2(175, 150);
+                foreach (var mod in scoreData.modifiers)
+                    GameObjectFactory.CreateImageHolder(hObj.transform, Vector2.zero, Vector2.one * 42, AssetManager.GetSprite($"{mod}.png"), $"{mod}Icon").GetComponent<Image>().maskable = false;
+            }
+
+            rowEntry.score.gameObject.AddComponent<BubblePopupHandler>().Initialize(bubble);
             rowEntry.rank.text = "#" + count;
             rowEntry.percent.text = scoreData.percentage.ToString("0.00") + "%";
             rowEntry.grade.text = scoreData.grade;

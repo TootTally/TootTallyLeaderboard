@@ -19,6 +19,7 @@ using TootTallyLeaderboard.Compatibility;
 using TrombLoader.CustomTracks;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.Experimental.AI;
 using UnityEngine.UI;
 using UnityEngine.Video;
 using static TootTallyCore.APIServices.SerializableClass;
@@ -44,6 +45,7 @@ namespace TootTallyLeaderboard.Replays
         private static float _replayTracktime;
 
         private static NewReplaySystem _replay;
+        private static GameObject _toottallyPauseWarning;
         private static ReplayManagerState _replayManagerState;
         private static Slider _replaySpeedSlider, _replayTimestampSlider;
         private static VideoPlayer _videoPlayer;
@@ -479,6 +481,29 @@ namespace TootTallyLeaderboard.Replays
             }
 
         }
+        [HarmonyPatch(typeof(PauseCanvasController), nameof(PauseCanvasController.Awake))]
+        [HarmonyPostfix]
+        static void PauseCanvasAddWarning(PauseCanvasController __instance)
+        {
+            _toottallyPauseWarning = GameObject.Instantiate(__instance.control_hint_box, __instance.panelobj.transform.parent);
+            _toottallyPauseWarning.transform.localScale = new Vector3(0, 0, 1);
+            var rect = _toottallyPauseWarning.GetComponent<RectTransform>();
+            rect.sizeDelta = new Vector2(210, 46);
+            rect.anchorMin = rect.anchorMax = new Vector2(.65f, .6f); 
+            _toottallyPauseWarning.GetComponent<Image>().color = new Color(.1f, .1f, 0, .5f);
+            var border = _toottallyPauseWarning.transform.GetChild(0).gameObject;
+            border.GetComponent<Image>().color = new Color(1, 1, 0, .3f);
+            GameObjectFactory.DestroyFromParent(border, "Image (1)");
+            GameObjectFactory.DestroyFromParent(border, "Image (2)");
+            GameObjectFactory.DestroyFromParent(border, "Image (3)");
+            GameObjectFactory.DestroyFromParent(border, "Text (1)");
+            var text = border.transform.Find("Text").GetComponent<Text>();
+            text.text = "Scores will not submit if you pause";
+            text.fontSize = 8;
+            text.rectTransform.anchoredPosition = Vector2.zero;
+            text.rectTransform.anchorMin = text.rectTransform.anchorMax = new Vector2(.1f, .55f);
+        }
+
 
         [HarmonyPatch(typeof(PauseCanvasController), nameof(PauseCanvasController.showPausePanel))]
         [HarmonyPostfix]
@@ -523,6 +548,7 @@ namespace TootTallyLeaderboard.Replays
         {
             if (_replayFileName != null && _replayFileName != "Spectating")
                 _replayManagerState = ReplayManagerState.Replaying;
+            HidePauseWarning();
         }
 
         [HarmonyPatch(typeof(GameController), nameof(GameController.pauseRetryLevel))]
@@ -531,8 +557,8 @@ namespace TootTallyLeaderboard.Replays
         {
             if (_replayFileName == null)
                 _replay.ClearData();
+            HidePauseWarning();
         }
-
 
         [HarmonyPatch(typeof(LevelSelectController), nameof(LevelSelectController.Start))]
         [HarmonyPostfix]
@@ -877,8 +903,14 @@ namespace TootTallyLeaderboard.Replays
             Plugin.LogInfo("Replay finished");
         }
 
+        private static void HidePauseWarning()
+        {
+            TootTallyAnimationManager.AddNewScaleAnimation(_toottallyPauseWarning, new Vector3(0, 0, 1), .8f, new SecondDegreeDynamicsAnimation(1.5f, .9f, 1f));
+        }
+
         public static void OnPauseAddReplayButton(PauseCanvasController __instance)
         {
+            TootTallyAnimationManager.AddNewScaleAnimation(_toottallyPauseWarning, Vector3.one, .8f, new SecondDegreeDynamicsAnimation(1.5f, .9f, 1f));
             __instance.panelrect.sizeDelta = new Vector2(290, 220);
             GameObject exitbtn = __instance.panelobj.transform.Find("buttons/ButtonRetry").gameObject;
             GameObject replayBtn = GameObject.Instantiate(exitbtn, __instance.panelobj.transform.Find("buttons"));
