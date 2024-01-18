@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using BaboonAPI.Hooks.Entrypoints;
 using BaboonAPI.Hooks.Tracks;
 using BepInEx;
 using HarmonyLib;
@@ -19,7 +17,6 @@ using TootTallyLeaderboard.Compatibility;
 using TrombLoader.CustomTracks;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.Experimental.AI;
 using UnityEngine.UI;
 using UnityEngine.Video;
 using static TootTallyCore.APIServices.SerializableClass;

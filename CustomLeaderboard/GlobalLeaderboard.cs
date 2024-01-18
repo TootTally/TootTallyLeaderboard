@@ -255,11 +255,17 @@ namespace TootTallyLeaderboard
                             var i = GameObjectFactory.CreateCustomButton(scoresbody.transform, Vector2.zero, new Vector2(sprite.rect.width, sprite.rect.height), sprite, false, "Pfp", OpenUserProfile);
                             i.transform.SetSiblingIndex(0);
                         });
-                        if (TootTallyUser.userInfo.tt == 0)
-                            TootTallyUser.userInfo.tt = user.tt;
 
+                        if (Plugin.Instance.option.SessionStartTT.Value == 0 || Plugin.Instance.ShouldUpdateSession)
+                        {
+                            Plugin.Instance.ShouldUpdateSession = false;
+                            Plugin.Instance.option.SessionDate.Value = DateTime.Now.AddDays(1).ToString();
+                            Plugin.Instance.option.SessionStartTT.Value = user.tt;
+                        }
+
+                        var sessionTT =  user.tt - Plugin.Instance.option.SessionStartTT.Value;
                         var t = GameObjectFactory.CreateSingleText(mainPanel.transform, "NameLabel", $"{user.username} #{user.rank}", Theme.colors.leaderboard.text);
-                        var t2 = GameObjectFactory.CreateSingleText(mainPanel.transform, "TTLabel", $"{user.tt}tt (<color=\"green\">{(user.tt - TootTallyUser.userInfo.tt > 0 ? "+" : "")}{user.tt - TootTallyUser.userInfo.tt:0.00}tt</color>)", Theme.colors.leaderboard.text);
+                        var t2 = GameObjectFactory.CreateSingleText(mainPanel.transform, "TTLabel", $"{user.tt}tt (<color=\"green\">{(sessionTT > 0 ? "+" : "")}{sessionTT:0.00}tt</color>)", Theme.colors.leaderboard.text);
                         _profilePopupLoadingSwirly.Dispose();
                     }));
 
