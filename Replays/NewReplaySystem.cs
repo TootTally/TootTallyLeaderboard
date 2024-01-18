@@ -233,7 +233,10 @@ namespace TootTallyLeaderboard.Replays
             _replayData = JsonConvert.DeserializeObject<ReplayData>(jsonFileFromZip);
             _isOldReplay = IsOldReplayFormat(replayVersion);
             if (_isOldReplay)
+            {
                 ConvertToCurrentReplayVersion(ref _replayData);
+                GlobalVariables.gamescrollspeed = _replayData.scrollspeed;
+            }
 
             if (incompatibleReplayVersions.Contains(_replayData.pluginbuilddate.ToString()))
             {
@@ -243,7 +246,7 @@ namespace TootTallyLeaderboard.Replays
                 Plugin.LogError("   Current Plugin Build Date " + TootTallyCore.Plugin.BUILDDATE);
                 return ReplayState.ReplayLoadErrorIncompatible;
             }
-            GlobalVariables.gamescrollspeed = _replayData.scrollspeed;
+            
             GameModifierManager.LoadModifiersFromString(_replayData.gamemodifiers ?? "");
 
             return ReplayState.ReplayLoadSuccess;

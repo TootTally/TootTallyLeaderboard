@@ -271,25 +271,22 @@ namespace TootTallyLeaderboard.Replays
         [HarmonyPostfix]
         public static void SetPointSceneControllerCustomUI(PointSceneController __instance)
         {
+            __instance.txt_trackname.supportRichText = true;
+
             if (gameSpeedMultiplier != 1f)
             {
                 Color color = Color.Lerp(new Color(.1f, .1f, .85f), Color.red, (gameSpeedMultiplier - .5f) / 1.5f);
                 string colorStringHeader = $"<Color='#{ColorUtility.ToHtmlStringRGBA(color)}'>";
                 string colorStringFoot = $"</Color>";
-                __instance.txt_trackname.supportRichText = true;
                 __instance.txt_trackname.text += $" {colorStringHeader}({gameSpeedMultiplier:0.00}x){colorStringFoot}";
+                
             }
 
+            string modifiers = GameModifierManager.GetModifiersString();
+            if (!modifiers.ToLower().Contains("none"))
+                __instance.txt_trackname.text += $" [{modifiers}]";
+
             GameObject lowerRightPanel = __instance.yellowwave.transform.parent.gameObject;
-            try
-            {
-                GameObject.DestroyImmediate(lowerRightPanel.transform.Find("rule-b").gameObject);
-                GameObject.DestroyImmediate(lowerRightPanel.transform.Find("rule-r").gameObject);
-            }
-            catch (Exception)
-            {
-                Plugin.LogInfo("Objects rule-b or rule-r couldn't be found.");
-            }
 
             GameObject UICanvas = lowerRightPanel.transform.parent.gameObject;
 
