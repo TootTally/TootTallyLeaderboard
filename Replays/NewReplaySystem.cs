@@ -240,7 +240,7 @@ namespace TootTallyLeaderboard.Replays
 
             if (incompatibleReplayVersions.Contains(_replayData.pluginbuilddate.ToString()))
             {
-                TootTallyNotifManager.DisplayNotif($"Replay incompatible:\nReplay Build Date is {_replayData.pluginbuilddate}\nCurrent Build Date is {TootTallyCore.Plugin.BUILDDATE}", Color.red);
+                TootTallyNotifManager.DisplayError($"Replay incompatible:\nReplay Build Date is {_replayData.pluginbuilddate}\nCurrent Build Date is {TootTallyCore.Plugin.BUILDDATE}");
                 Plugin.LogError("Cannot load replay:");
                 Plugin.LogError("   Replay Build Date is " + _replayData.pluginbuilddate);
                 Plugin.LogError("   Current Plugin Build Date " + TootTallyCore.Plugin.BUILDDATE);

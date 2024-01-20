@@ -199,6 +199,7 @@ namespace TootTallyLeaderboard
             _leaderboardHeaderPrefab.alignment = TextAlignmentOptions.Center;
             _leaderboardHeaderPrefab.maskable = true;
             _leaderboardHeaderPrefab.enableWordWrapping = false;
+            _leaderboardHeaderPrefab.color = Theme.colors.leaderboard.headerText;
             _leaderboardHeaderPrefab.gameObject.SetActive(true);
             _leaderboardHeaderPrefab.enableAutoSizing = true;
             _leaderboardHeaderPrefab.fontSizeMax = _leaderboardHeaderPrefab.fontSize;
@@ -216,7 +217,7 @@ namespace TootTallyLeaderboard
             _leaderboardTextPrefab.maskable = true;
             _leaderboardTextPrefab.enableWordWrapping = false;
             _leaderboardTextPrefab.gameObject.SetActive(true);
-            _leaderboardTextPrefab.color = Color.white;
+            _leaderboardTextPrefab.color = Theme.colors.leaderboard.text;
             _leaderboardTextPrefab.enableAutoSizing = true;
             _leaderboardTextPrefab.fontSizeMax = _leaderboardTextPrefab.fontSize;
 
@@ -277,7 +278,7 @@ namespace TootTallyLeaderboard
                 rect.anchorMin = rect.anchorMax = new Vector2(.5f, 0);
                 bubble.transform.Find("Window Body/BubbleText").GetComponent<TMP_Text>().rectTransform.sizeDelta = new Vector2(175, 150);
                 foreach (var mod in scoreData.modifiers)
-                    GameObjectFactory.CreateImageHolder(hObj.transform, Vector2.zero, Vector2.one * 42, AssetManager.GetSprite($"{mod}.png"), $"{mod}Icon").GetComponent<Image>().maskable = false;
+                    GameObjectFactory.CreateImageHolder(hObj.transform, Vector2.zero, Vector2.one * 42, AssetManager.GetSprite($"{mod}.png"), $"{mod}Icon", true).GetComponent<Image>().maskable = false;
             }
 
             rowEntry.score.gameObject.AddComponent<BubblePopupHandler>().Initialize(bubble);

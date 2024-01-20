@@ -22,24 +22,22 @@ namespace TootTallyLeaderboard
             SetSliderOption();
 
             Text yoinkText = GameObject.Find("MainCanvas/FullScreenPanel/ScrollSpeed-lbl").GetComponent<Text>();
-            Transform handleTransform = GameObject.Find("MainCanvas/FullScreenPanel/Slider/Handle Slide Area/Handle").transform;
-            handleTransform.gameObject.GetComponent<Image>().color = Theme.colors.scrollSpeedSlider.handle;
 
-            Transform starTransform = GameObject.Find("MainCanvas/FullScreenPanel/difficulty stars/star1").transform;
-            Text scrollSpeedSliderText = GameObject.Instantiate(yoinkText, handleTransform);
+            Slider slider = GameObject.Find("MainCanvas/FullScreenPanel/Slider").GetComponent<Slider>();
+            slider.fillRect.gameObject.GetComponent<Image>().color = Theme.colors.scrollSpeedSlider.fill;
+            slider.transform.Find("Background").GetComponent<Image>().color = Theme.colors.scrollSpeedSlider.background;
+            slider.handleRect.gameObject.GetComponent<Image>().color = Theme.colors.scrollSpeedSlider.handle;
+            slider.minValue = options.Min.Value / 100f;
+            slider.maxValue = options.Max.Value / 100f;
+            slider.value = options.LastValue.Value / 100f;
+
+            Text scrollSpeedSliderText = GameObject.Instantiate(yoinkText, slider.handleRect);
 
             scrollSpeedSliderText.GetComponent<RectTransform>().anchoredPosition = Vector2.zero;
             scrollSpeedSliderText.alignment = TextAnchor.MiddleCenter;
             scrollSpeedSliderText.fontSize = 12;
             scrollSpeedSliderText.text = ((int)(GlobalVariables.gamescrollspeed * 100)).ToString();
             scrollSpeedSliderText.color = Theme.colors.scrollSpeedSlider.text;
-
-            Slider slider = GameObject.Find("MainCanvas/FullScreenPanel/Slider").GetComponent<Slider>();
-            slider.fillRect.gameObject.GetComponent<Image>().color = Theme.colors.scrollSpeedSlider.fill;
-            slider.transform.Find("Background").GetComponent<Image>().color = Theme.colors.scrollSpeedSlider.background;
-            slider.minValue = options.Min.Value / 100f;
-            slider.maxValue = options.Max.Value / 100f;
-            slider.value = options.LastValue.Value / 100f;
             scrollSpeedSliderText.text = SliderValueToText(slider.value);
             slider.onValueChanged.AddListener((float _value) => { options.LastValue.Value = _value * 100f; scrollSpeedSliderText.text = SliderValueToText(_value); });
 

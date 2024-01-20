@@ -113,7 +113,7 @@ namespace TootTallyLeaderboard
 
             GameObject diffBar = _fullScreenPanelCanvas.transform.Find("diff bar").gameObject;
             GameObject.DestroyImmediate(_fullScreenPanelCanvas.transform.Find("difficulty text").gameObject);
-            var t = GameObjectFactory.CreateSingleText(diffBar.transform, "Difficulty Text", "Difficulty:", Theme.colors.leaderboard.text, GameObjectFactory.TextFont.Multicolore);
+            var t = GameObjectFactory.CreateSingleText(diffBar.transform, "Difficulty Text", "Difficulty:", GameObjectFactory.TextFont.Multicolore);
             t.alignment = TextAlignmentOptions.Left;
             t.margin = new Vector2(80, 4);
             t.fontSize = 16;
@@ -126,7 +126,7 @@ namespace TootTallyLeaderboard
             mask.showMaskGraphic = false;
             diffStarsHolder.AddComponent<Image>();
             diffBar.GetComponent<RectTransform>().sizeDelta += new Vector2(41.5f, 0);
-            _diffRating = GameObjectFactory.CreateSingleText(diffBar.transform, "diffRating", "", Theme.colors.leaderboard.text, GameObjectFactory.TextFont.Multicolore);
+            _diffRating = GameObjectFactory.CreateSingleText(diffBar.transform, "diffRating", "", GameObjectFactory.TextFont.Multicolore);
             _diffRating.outlineColor = Theme.colors.leaderboard.textOutline;
             _diffRating.outlineWidth = 0.2f;
             _diffRating.fontSize = 20;
@@ -226,7 +226,7 @@ namespace TootTallyLeaderboard
 
 
                 GameObject ttHitbox = LeaderboardFactory.CreateDefaultPanel(_fullScreenPanelCanvas.transform, new Vector2(381, -207), new Vector2(72, 72), "ProfilePopupHitbox");
-                GameObjectFactory.CreateSingleText(ttHitbox.transform, "ProfilePopupHitboxText", "P", Theme.colors.leaderboard.text, GameObjectFactory.TextFont.Multicolore);
+                GameObjectFactory.CreateSingleText(ttHitbox.transform, "ProfilePopupHitboxText", "P", GameObjectFactory.TextFont.Multicolore);
 
                 if (TootTallyUser.userInfo.id != 0)
                 {
@@ -264,8 +264,8 @@ namespace TootTallyLeaderboard
                         }
 
                         var sessionTT =  user.tt - Plugin.Instance.option.SessionStartTT.Value;
-                        var t = GameObjectFactory.CreateSingleText(mainPanel.transform, "NameLabel", $"{user.username} #{user.rank}", Theme.colors.leaderboard.text);
-                        var t2 = GameObjectFactory.CreateSingleText(mainPanel.transform, "TTLabel", $"{user.tt}tt (<color=\"green\">{(sessionTT > 0 ? "+" : "")}{sessionTT:0.00}tt</color>)", Theme.colors.leaderboard.text);
+                        var t = GameObjectFactory.CreateSingleText(mainPanel.transform, "NameLabel", $"{user.username} #{user.rank}");
+                        var t2 = GameObjectFactory.CreateSingleText(mainPanel.transform, "TTLabel", $"{user.tt}tt (<color=\"green\">{(sessionTT > 0 ? "+" : "")}{sessionTT:0.00}tt</color>)");
                         _profilePopupLoadingSwirly.Dispose();
                     }));
 
@@ -506,10 +506,9 @@ namespace TootTallyLeaderboard
                 btn.image.color = Color.white;
                 btn.colors = new ColorBlock
                 {
-                    normalColor = Color.white,
-                    selectedColor = Color.white,
-                    pressedColor = Color.yellow,
-                    highlightedColor = Color.gray,
+                    normalColor = Theme.colors.leaderboard.tabs.normalColor,
+                    pressedColor = Theme.colors.leaderboard.tabs.pressedColor,
+                    highlightedColor = Theme.colors.leaderboard.tabs.highlightedColor,
                     fadeDuration = .1f,
                     colorMultiplier = 1f
                 };
