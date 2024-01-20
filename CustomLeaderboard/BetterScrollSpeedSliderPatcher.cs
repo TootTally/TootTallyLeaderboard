@@ -24,6 +24,7 @@ namespace TootTallyLeaderboard
             Text yoinkText = GameObject.Find("MainCanvas/FullScreenPanel/ScrollSpeed-lbl").GetComponent<Text>();
 
             Slider slider = GameObject.Find("MainCanvas/FullScreenPanel/Slider").GetComponent<Slider>();
+            slider.navigation = new Navigation() { mode = Navigation.Mode.None };
             slider.fillRect.gameObject.GetComponent<Image>().color = Theme.colors.scrollSpeedSlider.fill;
             slider.transform.Find("Background").GetComponent<Image>().color = Theme.colors.scrollSpeedSlider.background;
             slider.handleRect.gameObject.GetComponent<Image>().color = Theme.colors.scrollSpeedSlider.handle;
