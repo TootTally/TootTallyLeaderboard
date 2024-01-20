@@ -187,7 +187,7 @@ namespace TootTallyLeaderboard.Replays
                     _currentGCInstance.musictrack.pitch = gameSpeedMultiplier; // SPEEEEEEEEEEEED
                     Plugin.LogInfo("GameSpeed set to " + gameSpeedMultiplier);
                 }
-                
+
             }
         }
 
@@ -277,7 +277,7 @@ namespace TootTallyLeaderboard.Replays
                 string colorStringHeader = $"<Color='#{ColorUtility.ToHtmlStringRGBA(color)}'>";
                 string colorStringFoot = $"</Color>";
                 __instance.txt_trackname.text += $" {colorStringHeader}({gameSpeedMultiplier:0.00}x){colorStringFoot}";
-                
+
             }
 
             string modifiers = GameModifierManager.GetModifiersString();
@@ -484,7 +484,7 @@ namespace TootTallyLeaderboard.Replays
             _toottallyPauseWarning.transform.localScale = new Vector3(0, 0, 1);
             var rect = _toottallyPauseWarning.GetComponent<RectTransform>();
             rect.sizeDelta = new Vector2(210, 46);
-            rect.anchorMin = rect.anchorMax = new Vector2(.65f, .6f); 
+            rect.anchorMin = rect.anchorMax = new Vector2(.65f, .6f);
             _toottallyPauseWarning.GetComponent<Image>().color = new Color(.1f, .1f, 0, .5f);
             var border = _toottallyPauseWarning.transform.GetChild(0).gameObject;
             border.GetComponent<Image>().color = new Color(1, 1, 0, .3f);
@@ -867,7 +867,7 @@ namespace TootTallyLeaderboard.Replays
             if (replay.tt != 0)
             {
                 _loadingSwirly?.Dispose();
-                var rankDiff = Math.Abs(replay.ranking - TootTallyUser.userInfo.rank);
+                var rankDiff = TootTallyUser.userInfo.rank - replay.ranking;
                 var displayMessage = "Replay submitted." + (replay.isBestPlay ? " New Personal best!\n" : "\n");
                 displayMessage += $"#{replay.position} {replay.tt:0.00}tt\n";
                 if (replay.isBestPlay)
@@ -879,7 +879,10 @@ namespace TootTallyLeaderboard.Replays
                 else
                 {
                     GameObjectFactory.CreateSingleText(_tootTallyScorePanel.transform, "TextPosition", $"#{replay.position} {replay.tt:0.00}tt");
-                    GameObjectFactory.CreateSingleText(_tootTallyScorePanel.transform, "TextRank", $"Global Rank: {TootTallyUser.userInfo.rank} -> {replay.ranking} (<color=\"green\">+{rankDiff}</color>)");
+                    var color =
+                        rankDiff > 0 ? "\"green\">-" :
+                        rankDiff < 0 ? "\"red\">+" : "\"white\">";
+                    GameObjectFactory.CreateSingleText(_tootTallyScorePanel.transform, "TextRank", $"Global Rank: {TootTallyUser.userInfo.rank} -> {replay.ranking} (<color={color}{rankDiff}</color>)");
                 }
             }
             else
