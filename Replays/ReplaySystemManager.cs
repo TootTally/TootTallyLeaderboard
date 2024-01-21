@@ -185,6 +185,7 @@ namespace TootTallyLeaderboard.Replays
                 {
                     _currentGCInstance.smooth_scrolling_move_mult = gameSpeedMultiplier;
                     _currentGCInstance.musictrack.pitch = gameSpeedMultiplier; // SPEEEEEEEEEEEED
+                    _currentGCInstance.breathmultiplier = gameSpeedMultiplier;
                     Plugin.LogInfo("GameSpeed set to " + gameSpeedMultiplier);
                 }
 
@@ -223,6 +224,7 @@ namespace TootTallyLeaderboard.Replays
             {
                 __instance.smooth_scrolling_move_mult = gameSpeedMultiplier;
                 __instance.musictrack.pitch = gameSpeedMultiplier;
+                __instance.breathmultiplier = gameSpeedMultiplier;
                 Plugin.LogInfo("BACKUP: GameSpeed set to " + gameSpeedMultiplier);
             }
         }
@@ -420,29 +422,7 @@ namespace TootTallyLeaderboard.Replays
             }
 
             if (__instance.noteplaying && Plugin.Instance.option.ChangePitchSpeed.Value)
-            {
                 __instance.currentnotesound.pitch *= gameSpeedMultiplier;
-            }
-
-            /*float value = 0;
-            if (__instance.noteplaying && __instance.breathcounter < 1f)
-            {
-                value = Time.deltaTime * (1 - gameSpeedMultiplier) * -0.22f;
-            }
-            else if (!__instance.noteplaying && __instance.breathcounter >= 0f)
-            {
-                if (!__instance.outofbreath)
-                    value = Time.deltaTime * (1 - gameSpeedMultiplier) * 8.5f;
-                else
-                    value = Time.deltaTime * (1 - gameSpeedMultiplier) * .29f;
-            }
-            __instance.breathcounter += value;
-            if (__instance.breathcounter >= 1f) { __instance.breathcounter = .99f; }*/
-            /*
-             * Refer to this function where the outOfBreath detection happens... no idea why there's a breathcount < 1f if statement
-             * Token: 0x06000268 RID: 616 RVA: 0x000260D8 File Offset: 0x000242D8
-            */
-
         }
 
         [HarmonyPatch(typeof(GameController), nameof(GameController.getScoreAverage))]
