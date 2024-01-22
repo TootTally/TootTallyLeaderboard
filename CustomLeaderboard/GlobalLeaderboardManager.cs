@@ -107,6 +107,7 @@ namespace TootTallyLeaderboard
             if (globalLeaderboard == null) return;
             __instance.btnturbo.SetActive(false);
             __instance.btnpractice.SetActive(false);
+            __instance.btn_steamleaderboard.SetActive(false);
 
         }
         #endregion

@@ -213,7 +213,7 @@ namespace TootTallyLeaderboard.Replays
         public static void FixAudioLatency(GameController __instance)
         {
             if (GlobalVariables.practicemode == 1 && !GlobalVariables.turbomode)
-                __instance.latency_offset = GlobalVariables.localsettings.latencyadjust * 0.001f * ReplaySystemManager.gameSpeedMultiplier;
+                __instance.latency_offset = GlobalVariables.localsettings.latencyadjust * 0.001f * gameSpeedMultiplier;
         }
 
         [HarmonyPatch(typeof(GameController), nameof(GameController.startDance))]
