@@ -4,6 +4,7 @@ using System.IO;
 using BaboonAPI.Hooks.Tracks;
 using BepInEx;
 using HarmonyLib;
+using Newtonsoft.Json.Linq;
 using TMPro;
 using TootTallyAccounts;
 using TootTallyCore;
@@ -420,6 +421,19 @@ namespace TootTallyLeaderboard.Replays
                         _pauseArrow.GetComponent<RectTransform>().anchoredPosition = _pausePointerAnimation.GetNewVector(_pauseArrowDestination, Time.deltaTime);
                     break;
             }
+
+            float value = 0;
+            if (!__instance.noteplaying && __instance.breathcounter >= 0f)
+            {
+                if (!__instance.outofbreath)
+                    value = Time.deltaTime * (1 - gameSpeedMultiplier) * 8.5f;
+                else
+                    value = Time.deltaTime * (1 - gameSpeedMultiplier) * .29f;
+            }
+            __instance.breathcounter += value;
+
+            if (__instance.breathcounter >= 1f) { __instance.breathcounter = .99f; }
+            if (__instance.outofbreath && __instance.breathcounter < 0f) { __instance.breathcounter = .01f; }
 
             if (__instance.noteplaying && Plugin.Instance.option.ChangePitchSpeed.Value)
                 __instance.currentnotesound.pitch *= gameSpeedMultiplier;
