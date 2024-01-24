@@ -42,7 +42,7 @@ namespace TootTallyLeaderboard.Replays
         public bool IsFullCombo { get => GlobalVariables.gameplay_notescores[0] == 0 && GlobalVariables.gameplay_notescores[1] == 0 && GlobalVariables.gameplay_notescores[2] == 0; }
         public bool IsTripleS { get => GlobalVariables.gameplay_notescores[0] == 0 && GlobalVariables.gameplay_notescores[1] == 0 && GlobalVariables.gameplay_notescores[2] == 0 && GlobalVariables.gameplay_notescores[3] == 0; }
 
-        private bool _isOldReplay;
+        public bool GetIsOldReplay;
 
         public NewReplaySystem()
         {
@@ -231,8 +231,8 @@ namespace TootTallyLeaderboard.Replays
 
             var replayVersion = JsonConvert.DeserializeObject<ReplayVersion>(jsonFileFromZip).version;
             _replayData = JsonConvert.DeserializeObject<ReplayData>(jsonFileFromZip);
-            _isOldReplay = IsOldReplayFormat(replayVersion);
-            if (_isOldReplay)
+            GetIsOldReplay = IsOldReplayFormat(replayVersion);
+            if (GetIsOldReplay)
             {
                 ConvertToCurrentReplayVersion(ref _replayData);
                 GlobalVariables.gamescrollspeed = _replayData.scrollspeed;
@@ -313,7 +313,7 @@ namespace TootTallyLeaderboard.Replays
             Cursor.visible = true;
             if (!__instance.controllermode) __instance.controllermode = true; //Still required to not make the mouse position update
 
-            if (_isOldReplay)
+            if (GetIsOldReplay)
                 time = (_replayData.pluginbuilddate < 20230705 ?
                  Math.Abs(__instance.noteholder.transform.position.x) : Math.Abs(__instance.noteholderr.anchoredPosition.x)) * GetNoteHolderPrecisionMultiplier();
             else
@@ -376,7 +376,7 @@ namespace TootTallyLeaderboard.Replays
             if (_currentNote != null)
             {
                 __instance.notescoreaverage = (float)_currentNote[(int)NDStruct.NS];
-                if (!_isOldReplay)
+                if (!GetIsOldReplay)
                     __instance.released_button_between_notes = _currentNote[(int)NDStruct.R] == 1;
 
             }
@@ -392,7 +392,7 @@ namespace TootTallyLeaderboard.Replays
                     __instance.currentscore = (int)_currentNote[(int)NDStruct.S];
                 __instance.totalscore = (int)_currentNote[(int)NDStruct.S];
                 __instance.currenthealth = (float)_currentNote[(int)NDStruct.H];
-                if (!_isOldReplay)
+                if (!GetIsOldReplay)
                 {
                     __instance.highestcombocounter = (int)_currentNote[(int)NDStruct.C];
                     __instance.highestcombo_level = (int)_currentNote[(int)NDStruct.HC];
