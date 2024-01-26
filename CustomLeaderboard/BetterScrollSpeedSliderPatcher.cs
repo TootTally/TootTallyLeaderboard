@@ -73,7 +73,7 @@ namespace TootTallyLeaderboard
 
             if (options.LastValue.Value < options.Min.Value || options.LastValue.Value > options.Max.Value) //Don't even try...
                 options.LastValue.Value = DEFAULT_VALUE;
-            GlobalVariables.gamescrollspeed = options.LastValue.Value;
+            GlobalVariables.gamescrollspeed = options.LastValue.Value / 100f;
         }
 
         public static string SliderValueToText(float value)

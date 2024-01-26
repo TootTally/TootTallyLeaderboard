@@ -639,7 +639,7 @@ namespace TootTallyLeaderboard.Replays
             if (ShouldSubmitReplay())
             {
                 SaveReplayToFile();
-                if (TootTallyUser.userInfo.username != "Guest") //Don't upload if logged in as a Guest
+                if (TootTallyUser.userInfo.username != "Guest" && Plugin.Instance.option.SubmitScores.Value) //Don't upload if logged in as a Guest
                     SendReplayFileToServer();
             }
 
@@ -648,6 +648,12 @@ namespace TootTallyLeaderboard.Replays
 
         public static bool ShouldSubmitReplay()
         {
+            if (!Plugin.Instance.option.SubmitScores.Value)
+            {
+                TootTallyNotifManager.DisplayWarning("Submit scores turned off, skipping replay submission.");
+                Plugin.LogInfo("Submit scores turned off, skipping replay submission.");
+                return false;
+            }
             if (AutoTootCompatibility.enabled && AutoTootCompatibility.WasAutoUsed)
             {
                 Plugin.LogInfo("AutoToot used, skipping replay submission.");
@@ -679,7 +685,6 @@ namespace TootTallyLeaderboard.Replays
                 TootTallyNotifManager.DisplayWarning("Replay UUID was null, skipping replay submission.");
                 return false; //Dont save or upload if no UUID
             }
-
             if (GameModifierManager.GetModifiersString().Contains("BT"))
             {
                 Plugin.LogInfo("BT modifier was used, skipping replay submission.");
@@ -692,6 +697,7 @@ namespace TootTallyLeaderboard.Replays
                 Plugin.LogInfo("Unexpected error occured while submitting, allowSubmit is false, skipping replay submission.");
                 return false;
             }
+
             return true;
         }
 
