@@ -10,6 +10,7 @@ using TootTallyCore.Graphics;
 using TootTallyCore.Graphics.Animations;
 using TootTallyCore.Utils.Assets;
 using TootTallyCore.Utils.Helpers;
+using TootTallyCore.Utils.TootTallyGlobals;
 using TootTallyCore.Utils.TootTallyNotifs;
 using TrombLoader.CustomTracks;
 using UnityEngine;
@@ -213,7 +214,7 @@ namespace TootTallyLeaderboard
                 _gameSpeedSlider.onValueChanged.AddListener((float _value) =>
                 {
                     _gameSpeedSlider.value = Mathf.Round(_value * 20) / 20f;
-                    Replays.ReplaySystemManager.gameSpeedMultiplier = _gameSpeedSlider.value * .05f + .5f;
+                    TootTallyGlobalVariables.gameSpeedMultiplier = _gameSpeedSlider.value * .05f + .5f;
                     scrollSpeedSliderText.text = Replays.ReplaySystemManager.gameSpeedMultiplier.ToString("0.00");
                     UpdateStarRating(__instance);
                 });

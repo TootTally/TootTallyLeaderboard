@@ -12,11 +12,8 @@ using TootTallySettings;
 namespace TootTallyLeaderboard
 {
     [BepInPlugin(PluginInfo.PLUGIN_GUID, PluginInfo.PLUGIN_NAME, PluginInfo.PLUGIN_VERSION)]
-    [BepInDependency("TootTallyCore", BepInDependency.DependencyFlags.HardDependency)]
-    [BepInDependency("TootTallySettings", BepInDependency.DependencyFlags.HardDependency)]
     [BepInDependency("TootTallyAccounts", BepInDependency.DependencyFlags.HardDependency)]
     [BepInDependency("TootTallyGameModifiers", BepInDependency.DependencyFlags.HardDependency)]
-    [BepInDependency("TootTallyThemes", BepInDependency.DependencyFlags.SoftDependency)]
     public class Plugin : BaseUnityPlugin, ITootTallyModule
     {
         public static Plugin Instance;

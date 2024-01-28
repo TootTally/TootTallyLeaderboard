@@ -11,8 +11,10 @@ using TootTallyCore;
 using TootTallyCore.APIServices;
 using TootTallyCore.Graphics;
 using TootTallyCore.Graphics.Animations;
+using TootTallyCore.Utils;
 using TootTallyCore.Utils.Assets;
 using TootTallyCore.Utils.Helpers;
+using TootTallyCore.Utils.TootTallyGlobals;
 using TootTallyCore.Utils.TootTallyNotifs;
 using TootTallyGameModifiers;
 using TootTallyLeaderboard.Compatibility;
@@ -32,12 +34,12 @@ namespace TootTallyLeaderboard.Replays
         private const float SWIRLY_SPEED = 0.5f;
 
         private static int _targetFramerate;
-        public static bool wasPlayingReplay;
+        public static bool wasPlayingReplay => TootTallyGlobalVariables.wasReplaying;
         private static bool _hasPaused, _hasRewindReplay;
         private static bool _hasReleaseToot, _lastIsTooting;
 
         private static float _elapsedTime;
-        public static float gameSpeedMultiplier = 1f;
+        public static float gameSpeedMultiplier => TootTallyGlobalVariables.gameSpeedMultiplier;
 
         private static string _replayUUID;
         private static string _replayFileName;
@@ -65,7 +67,7 @@ namespace TootTallyLeaderboard.Replays
         [HarmonyPrefix]
         public static void GameControllerPrefixPatch(GameController __instance)
         {
-            wasPlayingReplay = _replayFileName != null && _replayFileName != "Spectating";
+            TootTallyGlobalVariables.wasReplaying = _replayFileName != null && _replayFileName != "Spectating";
             if (_replay == null)
             {
                 _replayManagerState = ReplayManagerState.None;
@@ -78,27 +80,13 @@ namespace TootTallyLeaderboard.Replays
         public static void GameControllerPostfixPatch(GameController __instance)
         {
             _currentGCInstance = __instance;
-            if (__instance.freeplay)
-            {
-                gameSpeedMultiplier = __instance.smooth_scrolling_move_mult = 1f;
-                return;
-            }
+            if (__instance.freeplay) return;
 
-            if (GlobalVariables.turbomode)
-            {
-                gameSpeedMultiplier = 2f;
-            }
-            else if (GlobalVariables.practicemode != 1f)
-            {
-                gameSpeedMultiplier = GlobalVariables.practicemode;
-            }
-            else if (!Plugin.Instance.option.ShowLeaderboard.Value)
-                gameSpeedMultiplier = 1f;
-
-            if (_replayFileName == null)
+            if (_replayFileName == null && !TootTallyGlobalVariables.isSpectating)
                 OnRecordingStart();
-            else if (_replayFileName == "Spectating")
+            else if (TootTallyGlobalVariables.isSpectating)
             {
+                _replayFileName = "Spectating";
                 _replayManagerState = ReplayManagerState.Spectating;
             }
             else
@@ -131,6 +119,8 @@ namespace TootTallyLeaderboard.Replays
         [HarmonyPostfix]
         public static void OnGameControllerPlaySongSetReplayStartTime()
         {
+            if (TootTallyGlobalVariables.isSpectating) return;
+
             if (_replay != null && !wasPlayingReplay)
             {
                 SetReplayUUID();
@@ -176,37 +166,6 @@ namespace TootTallyLeaderboard.Replays
                     });
                 }
             }
-            else if (Plugin.Instance.option.ShowLeaderboard.Value)
-            {
-                if (_videoPlayer != null)
-                    _videoPlayer.playbackSpeed = gameSpeedMultiplier;
-
-                //Have to set the speed here because the pitch is changed in 2 different places? one time during GC.Start and one during GC.loadAssetBundleResources... Derp
-                if (_currentGCInstance != null)
-                {
-                    _currentGCInstance.smooth_scrolling_move_mult = gameSpeedMultiplier;
-                    _currentGCInstance.musictrack.pitch = gameSpeedMultiplier; // SPEEEEEEEEEEEED
-                    _currentGCInstance.breathmultiplier = gameSpeedMultiplier;
-                    Plugin.LogInfo("GameSpeed set to " + gameSpeedMultiplier);
-                }
-
-            }
-        }
-
-        [HarmonyPatch(typeof(GameController), nameof(GameController.fixAudioMixerStuff))]
-        [HarmonyPrefix]
-        public static bool OnFixAudioMixerStuffPostFix(GameController __instance)
-        {
-            if (!Plugin.Instance.option.ChangePitchSpeed.Value && Plugin.Instance.option.ShowLeaderboard.Value)
-            {
-                __instance.musictrack.outputAudioMixerGroup = __instance.audmix_bgmus_pitchshifted;
-                __instance.audmix.SetFloat("pitchShifterMult", 1f / gameSpeedMultiplier);
-                __instance.audmix.SetFloat("mastervol", Mathf.Log10(GlobalVariables.localsettings.maxvolume) * 40f);
-                __instance.audmix.SetFloat("trombvol", Mathf.Log10(GlobalVariables.localsettings.maxvolume_tromb) * 60f + 12f);
-                __instance.audmix.SetFloat("airhornvol", (GlobalVariables.localsettings.maxvolume_airhorn - 1f) * 80f);
-                return false;
-            }
-            return true;
         }
 
         [HarmonyPatch(typeof(GameController), nameof(GameController.buildNotes))]
@@ -216,20 +175,6 @@ namespace TootTallyLeaderboard.Replays
             if (GlobalVariables.practicemode == 1 && !GlobalVariables.turbomode)
                 __instance.latency_offset = GlobalVariables.localsettings.latencyadjust * 0.001f * gameSpeedMultiplier;
         }
-
-        [HarmonyPatch(typeof(GameController), nameof(GameController.startDance))]
-        [HarmonyPostfix]
-        public static void OnGameControllerStartDanceFixSpeedBackup(GameController __instance)
-        {
-            if (__instance.musictrack.pitch != gameSpeedMultiplier && Plugin.Instance.option.ShowLeaderboard.Value)
-            {
-                __instance.smooth_scrolling_move_mult = gameSpeedMultiplier;
-                __instance.musictrack.pitch = gameSpeedMultiplier;
-                __instance.breathmultiplier = gameSpeedMultiplier;
-                Plugin.LogInfo("BACKUP: GameSpeed set to " + gameSpeedMultiplier);
-            }
-        }
-
 
         [HarmonyPatch(typeof(GameController), nameof(GameController.isNoteButtonPressed))]
         [HarmonyPostfix]
@@ -568,7 +513,7 @@ namespace TootTallyLeaderboard.Replays
             {
                 case NewReplaySystem.ReplayState.ReplayLoadSuccess:
                     _replayFileName = replayId;
-                    gameSpeedMultiplier = _replay.GetReplaySpeed;
+                    TootTallyGlobalVariables.gameSpeedMultiplier = _replay.GetReplaySpeed;
                     levelSelectControllerInstance.playbtn.onClick?.Invoke();
                     break;
 
@@ -616,11 +561,12 @@ namespace TootTallyLeaderboard.Replays
 
         public static void OnRecordingStart()
         {
-            wasPlayingReplay = _hasPaused = _hasReleaseToot = false;
+            TootTallyGlobalVariables.wasReplaying = _hasPaused = _hasReleaseToot = false;
             _elapsedTime = 0;
             _targetFramerate = Application.targetFrameRate > 60 || Application.targetFrameRate < 1 ? 60 : Application.targetFrameRate; //Could let the user choose replay framerate... but risky for when they will upload to our server
             _replay.SetupRecording(_targetFramerate);
             _replayManagerState = ReplayManagerState.Recording;
+            TootTallyGlobalVariables.isReplaying = false;
         }
 
         public static void OnReplayingStart()
@@ -629,6 +575,7 @@ namespace TootTallyLeaderboard.Replays
             _replay.OnReplayPlayerStart();
             _lastIsTooting = _hasRewindReplay = false;
             _replayManagerState = ReplayManagerState.Replaying;
+            TootTallyGlobalVariables.isReplaying = true;
             Plugin.LogInfo("Replay Started");
         }
 
@@ -689,6 +636,12 @@ namespace TootTallyLeaderboard.Replays
             {
                 Plugin.LogInfo("BT modifier was used, skipping replay submission.");
                 return false; //Dont save or upload if no UUID
+            }
+
+            if (TootTallyGlobalVariables.isSpectating)
+            {
+                Plugin.LogInfo("Spectating someone, skipping replay submission.");
+                return false;
             }
 
             if (!TootTallyUser.userInfo.allowSubmit)
@@ -962,8 +915,6 @@ namespace TootTallyLeaderboard.Replays
             retrybtn.transform.Find("RETRY").GetComponent<Text>().text = "Restart Replay";
             _pauseArrowDestination = new Vector2(28, -37);
         }
-
-        public static void SetSpectatingMode() => _replayFileName = "Spectating";
 
         public enum ReplayManagerState
         {

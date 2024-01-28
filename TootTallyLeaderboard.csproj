@@ -4,7 +4,7 @@
 		<TargetFramework>net472</TargetFramework>
 		<AssemblyName>TootTallyLeaderboard</AssemblyName>
 		<Description>TootTally Leaderboard and Replay module</Description>
-		<Version>1.0.6</Version>
+		<Version>1.0.7</Version>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<LangVersion>latest</LangVersion>
 		<TromboneChampDir>E:\SteamLibrary\steamapps\common\TromboneChamp</TromboneChampDir>
@@ -38,9 +38,6 @@
 		</Reference>
 		<Reference Include="TootTallyGameModifiers">
 			<HintPath>$(TromboneTootDir)\BepInEx\plugins\TootTally-TootTallyGameModifiers\TootTallyGameModifiers.dll</HintPath>
-		</Reference>
-		<Reference Include="TootTallyDiscordSDK">
-			<HintPath>$(TromboneTootDir)\BepInEx\plugins\TootTally-TootTallyDiscordSDK\TootTallyDiscordSDK.dll</HintPath>
 		</Reference>
 	</ItemGroup>
 

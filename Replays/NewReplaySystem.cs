@@ -8,6 +8,7 @@ using BepInEx;
 using Newtonsoft.Json;
 using TootTallyAccounts;
 using TootTallyCore.Utils.Helpers;
+using TootTallyCore.Utils.TootTallyGlobals;
 using TootTallyCore.Utils.TootTallyNotifs;
 using TootTallyGameModifiers;
 using TrombLoader.CustomTracks;
@@ -42,7 +43,7 @@ namespace TootTallyLeaderboard.Replays
         public bool IsFullCombo { get => GlobalVariables.gameplay_notescores[0] == 0 && GlobalVariables.gameplay_notescores[1] == 0 && GlobalVariables.gameplay_notescores[2] == 0; }
         public bool IsTripleS { get => GlobalVariables.gameplay_notescores[0] == 0 && GlobalVariables.gameplay_notescores[1] == 0 && GlobalVariables.gameplay_notescores[2] == 0 && GlobalVariables.gameplay_notescores[3] == 0; }
 
-        public bool GetIsOldReplay;
+        public bool GetIsOldReplay => TootTallyGlobalVariables.isOldReplay;
 
         public NewReplaySystem()
         {
@@ -231,7 +232,7 @@ namespace TootTallyLeaderboard.Replays
 
             var replayVersion = JsonConvert.DeserializeObject<ReplayVersion>(jsonFileFromZip).version;
             _replayData = JsonConvert.DeserializeObject<ReplayData>(jsonFileFromZip);
-            GetIsOldReplay = IsOldReplayFormat(replayVersion);
+            TootTallyGlobalVariables.isOldReplay = IsOldReplayFormat(replayVersion);
             if (GetIsOldReplay)
             {
                 ConvertToCurrentReplayVersion(ref _replayData);
