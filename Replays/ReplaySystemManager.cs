@@ -168,14 +168,6 @@ namespace TootTallyLeaderboard.Replays
             }
         }
 
-        [HarmonyPatch(typeof(GameController), nameof(GameController.buildNotes))]
-        [HarmonyPrefix]
-        public static void FixAudioLatency(GameController __instance)
-        {
-            if (GlobalVariables.practicemode == 1 && !GlobalVariables.turbomode)
-                __instance.latency_offset = GlobalVariables.localsettings.latencyadjust * 0.001f * gameSpeedMultiplier;
-        }
-
         [HarmonyPatch(typeof(GameController), nameof(GameController.isNoteButtonPressed))]
         [HarmonyPostfix]
         public static void GameControllerIsNoteButtonPressedPostfixPatch(GameController __instance, ref bool __result) // Take isNoteButtonPressed's return value and changed it to mine, hehe
