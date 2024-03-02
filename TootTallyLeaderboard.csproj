@@ -39,9 +39,6 @@
 		<Reference Include="TootTallyGameModifiers">
 			<HintPath>$(TromboneTootDir)\BepInEx\plugins\TootTally-TootTallyGameModifiers\TootTallyGameModifiers.dll</HintPath>
 		</Reference>
-		<Reference Include="TootTallyDiscordSDK">
-			<HintPath>$(TromboneTootDir)\BepInEx\plugins\TootTally-TootTallyDiscordSDK\TootTallyDiscordSDK.dll</HintPath>
-		</Reference>
 	</ItemGroup>
 
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
