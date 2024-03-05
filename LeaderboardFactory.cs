@@ -271,7 +271,8 @@ namespace TootTallyLeaderboard
             if (scoreData.modifiers != null && !scoreData.modifiers.Contains("NONE"))
             {
                 rowEntry.score.text += "*";
-                var hObj = GameObject.Instantiate(new GameObject("HorizontalLayout", typeof(HorizontalLayoutGroup)), bubble.transform.Find("Window Body"));
+                var hObj = new GameObject("HorizontalLayout", typeof(HorizontalLayoutGroup));
+                hObj.transform.SetParent(bubble.transform.Find("Window Body"));
                 var layout = hObj.GetComponent<HorizontalLayoutGroup>();
                 layout.childControlHeight = layout.childForceExpandHeight = false;
                 var rect = hObj.GetComponent<RectTransform>();

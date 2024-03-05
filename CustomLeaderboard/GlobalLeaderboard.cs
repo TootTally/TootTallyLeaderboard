@@ -188,7 +188,7 @@ namespace TootTallyLeaderboard
                 //Patch current slider and move it slightly above RANDOM_btn
                 BetterScrollSpeedSliderPatcher.PatchScrollSpeedSlider();
                 _fullScreenPanelCanvas.transform.Find("Slider").GetComponent<RectTransform>().anchoredPosition = new Vector2(-115, 23);
-                _fullScreenPanelCanvas.transform.Find("ScrollSpeedShad").GetComponent<RectTransform>().anchoredPosition = new Vector2(-112, 36);
+                _fullScreenPanelCanvas.transform.Find("txt_scrollspeed").GetComponent<RectTransform>().anchoredPosition = new Vector2(-112, 36);
 
                 //Remove btn_TURBO + btn_PRACTICE and add GameSpeed slider
                 _fullScreenPanelCanvas.transform.Find("btn_TURBO").gameObject.SetActive(false);
@@ -200,11 +200,11 @@ namespace TootTallyLeaderboard
                 _gameSpeedSlider.maxValue = 30;
                 _gameSpeedSlider.value = (Replays.ReplaySystemManager.gameSpeedMultiplier - .5f) / .05f;
 
-                GameObject gameSpeedText = GameObject.Instantiate(_fullScreenPanelCanvas.transform.Find("ScrollSpeedShad").gameObject, _fullScreenPanelCanvas.transform);
+                GameObject gameSpeedText = GameObject.Instantiate(_fullScreenPanelCanvas.transform.Find("txt_scrollspeed").gameObject, _fullScreenPanelCanvas.transform);
                 gameSpeedText.name = "GameSpeedShad";
                 gameSpeedText.GetComponent<Text>().text = "Game Speed";
                 gameSpeedText.GetComponent<RectTransform>().anchoredPosition = new Vector2(-108, 78);
-                GameObject gameSpeedTextFG = gameSpeedText.transform.Find("ScrollSpeed").gameObject;
+                GameObject gameSpeedTextFG = gameSpeedText.transform.Find("txt_scrollspeed-top").gameObject;
                 gameSpeedTextFG.name = "GameSpeed";
                 gameSpeedTextFG.GetComponent<Text>().text = "Game Speed";
 

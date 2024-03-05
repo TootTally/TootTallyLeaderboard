@@ -422,8 +422,8 @@ namespace TootTallyLeaderboard.Replays
             GameObjectFactory.DestroyFromParent(border, "Image (1)");
             GameObjectFactory.DestroyFromParent(border, "Image (2)");
             GameObjectFactory.DestroyFromParent(border, "Image (3)");
-            GameObjectFactory.DestroyFromParent(border, "Text (1)");
-            var text = border.transform.Find("Text").GetComponent<Text>();
+            GameObjectFactory.DestroyFromParent(border, "txt-track-vol");
+            var text = border.transform.Find("txt-quick-restart").GetComponent<Text>();
             text.text = "Scores will not submit if you pause";
             text.fontSize = 8;
             text.rectTransform.anchoredPosition = Vector2.zero;
