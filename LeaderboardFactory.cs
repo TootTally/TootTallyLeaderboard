@@ -277,6 +277,7 @@ namespace TootTallyLeaderboard
                 layout.childControlHeight = layout.childForceExpandHeight = false;
                 var rect = hObj.GetComponent<RectTransform>();
                 rect.anchorMin = rect.anchorMax = new Vector2(.5f, 0);
+                rect.anchoredPosition = Vector2.zero;
                 bubble.transform.Find("Window Body/BubbleText").GetComponent<TMP_Text>().rectTransform.sizeDelta = new Vector2(175, 150);
                 foreach (var mod in scoreData.modifiers)
                     GameObjectFactory.CreateImageHolder(hObj.transform, Vector2.zero, Vector2.one * 42, AssetManager.GetSprite($"{mod}.png"), $"{mod}Icon", true).GetComponent<Image>().maskable = false;

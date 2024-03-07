@@ -19,7 +19,7 @@ namespace TootTallyLeaderboard.Replays
     public class NewReplaySystem
     {
         public static List<string> incompatibleReplayVersions = new List<string> { "1.0.0" };
-        public const string REPLAY_VERSION = "2.0.1";
+        public const string REPLAY_VERSION = "2.1.0";
 
         private int _frameIndex, _tootIndex;
 
@@ -196,21 +196,27 @@ namespace TootTallyLeaderboard.Replays
             _tootIndex = 0;
             _isTooting = false;
             _isLastNote = false;
-            _currentFrame = _replayData.framedata.First();
-            _currentNote = _replayData.notedata.First();
+            _currentFrame = _replayData.framedata.Count > 0 ? _replayData.framedata.First() : null;
+            _currentNote = _replayData.notedata.Count > 0 ? _replayData.notedata.First() : null;
             _currentToot = new dynamic[] { 0, 0, 0 };
         }
 
         public void OnReplayRewind(float newTiming, GameController __instance)
         {
-            _frameIndex = Mathf.Clamp(_replayData.framedata.FindIndex(frame => (float)frame[(int)FDStruct.T] > newTiming) - 1, 0, _replayData.framedata.Count - 1);
-            _tootIndex = Mathf.Clamp(_replayData.tootdata.FindIndex(frame => (float)frame[(int)TDStruct.T] > newTiming) - 1, 0, _replayData.tootdata.Count - 1);
+            if (_replayData.framedata.Count != 0)
+            {
+                _frameIndex = Mathf.Clamp(_replayData.framedata.FindIndex(frame => (float)frame[(int)FDStruct.T] > newTiming) - 1, 0, _replayData.framedata.Count - 1);
+                _currentFrame = _replayData.framedata[_frameIndex];
+            }
+            if (_replayData.tootdata.Count != 0)
+            {
+                _tootIndex = Mathf.Clamp(_replayData.tootdata.FindIndex(frame => (float)frame[(int)TDStruct.T] > newTiming) - 1, 0, _replayData.tootdata.Count - 1);
+                _currentToot = _replayData.tootdata[_tootIndex];
+            }
 
-            _currentFrame = _replayData.framedata[_frameIndex];
-            _currentToot = _replayData.tootdata[_tootIndex];
             _isTooting = false;
 
-            if (__instance.currentnoteindex != 0)
+            if (_replayData.notedata.Count != 0 && __instance.currentnoteindex != 0)
                 __instance.currentscore = (int)_replayData.notedata.Find(note => (int)note[(int)NDStruct.I] == __instance.currentnoteindex - 1)[(int)NDStruct.S];
         }
 
@@ -247,7 +253,7 @@ namespace TootTallyLeaderboard.Replays
                 Plugin.LogError("   Current Plugin Build Date " + TootTallyCore.Plugin.BUILDDATE);
                 return ReplayState.ReplayLoadErrorIncompatible;
             }
-            
+
             GameModifierManager.LoadModifiersFromString(_replayData.gamemodifiers ?? "");
 
             return ReplayState.ReplayLoadSuccess;
@@ -360,7 +366,7 @@ namespace TootTallyLeaderboard.Replays
 
         private void PlaybackTimeTootData(float time)
         {
-            if (time >= _currentToot[(int)TDStruct.T] && _isTooting != (_currentToot[(int)TDStruct.O] == 1))
+            if (_currentToot != null && time >= _currentToot[(int)TDStruct.T] && _isTooting != (_currentToot[(int)TDStruct.O] == 1))
                 _isTooting = _currentToot[(int)TDStruct.O] == 1;
 
             if (_replayData.tootdata.Count > _tootIndex && time >= _currentToot[(int)TDStruct.T])
@@ -369,7 +375,7 @@ namespace TootTallyLeaderboard.Replays
 
         public void SetNoteScorePrefix(GameController __instance)
         {
-            if (!_isLastNote)
+            if (_replayData.notedata.Count != 0 && !_isLastNote)
             {
                 _currentNote = _replayData.notedata.Find(x => x[(int)NDStruct.I] == __instance.currentnoteindex);
                 _isLastNote = _replayData.notedata.Last()[(int)NDStruct.I] == __instance.currentnoteindex;
