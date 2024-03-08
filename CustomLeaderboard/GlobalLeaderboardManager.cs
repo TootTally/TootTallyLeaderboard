@@ -85,7 +85,8 @@ namespace TootTallyLeaderboard
                     globalLeaderboard.OpenSongLeaderboard();
                 else if (tabIndex == 2)
                     globalLeaderboard.ScrollToLocalScore();
-                return false;
+                else
+                    return false;
             }
 
             return true;

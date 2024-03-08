@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using BaboonAPI.Hooks.Tracks;
 using TMPro;
@@ -264,7 +266,7 @@ namespace TootTallyLeaderboard
                             Plugin.Instance.option.SessionStartTT.Value = user.tt;
                         }
 
-                        var sessionTT =  user.tt - Plugin.Instance.option.SessionStartTT.Value;
+                        var sessionTT = user.tt - Plugin.Instance.option.SessionStartTT.Value;
                         var t = GameObjectFactory.CreateSingleText(mainPanel.transform, "NameLabel", $"{user.username} #{user.rank}");
                         var t2 = GameObjectFactory.CreateSingleText(mainPanel.transform, "TTLabel", $"{user.tt}tt (<color=\"green\">{(sessionTT > 0 ? "+" : "")}{sessionTT:0.00}tt</color>)");
                         _profilePopupLoadingSwirly.Dispose();
@@ -484,6 +486,19 @@ namespace TootTallyLeaderboard
         public void OpenUserProfile() => Application.OpenURL("https://toottally.com/profile/" + TootTallyAccounts.TootTallyUser.userInfo.id);
         public void OpenLoginPage() => Application.OpenURL("https://toottally.com/login");
         public void OpenSongLeaderboard() => Application.OpenURL("https://toottally.com/song/" + _currentSelectedSongHash);
+        public void OpenSongFolder()
+        {
+            var track = TrackLookup.lookup(_songData.track_ref);
+            string path;
+            if (track is CustomTrack ct)
+                path = ct.folderPath;
+            else
+                path = $"{Application.streamingAssetsPath}/trackassets/{track.trackref}";
+            if (Directory.Exists(path))
+                Process.Start(path);
+            else
+                TootTallyNotifManager.DisplayNotif("Folder couldn't be found.");
+        }
 
         public void ScrollToLocalScore()
         {
@@ -513,8 +528,9 @@ namespace TootTallyLeaderboard
                     fadeDuration = .1f,
                     colorMultiplier = 1f
                 };
-
             }
+            var image = GameObjectFactory.CreateClickableImageHolder(_tabs.transform, Vector2.zero, Vector2.one * 40f, AssetManager.GetSprite("folder64.png"), "Open Folder Button",
+                Theme.colors.leaderboard.tabs.normalColor, Theme.colors.leaderboard.tabs.highlightedColor, OpenSongFolder);
             _tabs.SetActive(true);
         }
 
