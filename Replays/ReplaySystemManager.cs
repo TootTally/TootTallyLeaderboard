@@ -21,6 +21,7 @@ using TootTallyLeaderboard.Compatibility;
 using TrombLoader.CustomTracks;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.Localization.Components;
 using UnityEngine.UI;
 using UnityEngine.Video;
 using static TootTallyCore.APIServices.SerializableClass;
@@ -358,22 +359,6 @@ namespace TootTallyLeaderboard.Replays
                         _pauseArrow.GetComponent<RectTransform>().anchoredPosition = _pausePointerAnimation.GetNewVector(_pauseArrowDestination, Time.deltaTime);
                     break;
             }
-
-            float value = 0;
-            if (!__instance.noteplaying && __instance.breathcounter >= 0f)
-            {
-                if (!__instance.outofbreath)
-                    value = Time.deltaTime * (1 - gameSpeedMultiplier) * 8.5f;
-                else
-                    value = Time.deltaTime * (1 - gameSpeedMultiplier) * .29f;
-            }
-            __instance.breathcounter += value;
-
-            if (__instance.breathcounter >= 1f) { __instance.breathcounter = .99f; }
-            if (__instance.outofbreath && __instance.breathcounter < 0f) { __instance.breathcounter = .01f; }
-
-            if (__instance.noteplaying && Plugin.Instance.option.ChangePitchSpeed.Value)
-                __instance.currentnotesound.pitch *= gameSpeedMultiplier;
         }
 
         [HarmonyPatch(typeof(GameController), nameof(GameController.getScoreAverage))]
@@ -412,6 +397,8 @@ namespace TootTallyLeaderboard.Replays
         static void PauseCanvasAddWarning(PauseCanvasController __instance)
         {
             _toottallyPauseWarning = GameObject.Instantiate(__instance.control_hint_box, __instance.panelobj.transform.parent);
+            if (_toottallyPauseWarning.TryGetComponent(out LocalizeStringEvent locEvent))
+                GameObject.DestroyImmediate(locEvent);
             _toottallyPauseWarning.transform.localScale = new Vector3(0, 0, 1);
             var rect = _toottallyPauseWarning.GetComponent<RectTransform>();
             rect.sizeDelta = new Vector2(210, 46);
@@ -707,7 +694,7 @@ namespace TootTallyLeaderboard.Replays
                 Time.timeScale = _replaySpeedSlider.value;
                 replaySpeedSliderText.text = BetterScrollSpeedSliderPatcher.SliderValueToText(_replaySpeedSlider.value);
                 __instance.musictrack.outputAudioMixerGroup = __instance.audmix_bgmus_pitchshifted;
-                if (!Plugin.Instance.option.ChangePitchSpeed.Value)
+                if (!TootTallyCore.Plugin.Instance.ChangePitch.Value)
                 {
                     __instance.audmix.SetFloat("pitchShifterMult", 1f / (_replaySpeedSlider.value * gameSpeedMultiplier));
                 }

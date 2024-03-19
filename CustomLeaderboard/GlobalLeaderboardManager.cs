@@ -71,25 +71,23 @@ namespace TootTallyLeaderboard
 
         [HarmonyPatch(typeof(LeaderboardManager), nameof(LeaderboardManager.clickTab))]
         [HarmonyPrefix]
-        static bool OverwriteClickLeaderboardTabs(object[] __args)
+        static bool OverwriteClickLeaderboardTabs(int tabindex)
         {
             if (globalLeaderboard != null && globalLeaderboard.HasLeaderboard)
             {
-                int tabIndex = (int)__args[0];
-                if (tabIndex == 0)
+                if (tabindex == 0)
                     if (TootTallyAccounts.TootTallyUser.userInfo.id != 0)
                         globalLeaderboard.OpenUserProfile();
                     else
                         globalLeaderboard.OpenLoginPage();
-                else if (tabIndex == 1)
+                else if (tabindex == 1)
                     globalLeaderboard.OpenSongLeaderboard();
-                else if (tabIndex == 2)
+                else if (tabindex == 2)
                     globalLeaderboard.ScrollToLocalScore();
                 else
-                    return false;
+                    return true;
             }
-
-            return true;
+            return false;
         }
 
         [HarmonyPatch(typeof(LevelSelectController), nameof(LevelSelectController.clickNext))]

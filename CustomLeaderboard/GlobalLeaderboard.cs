@@ -531,6 +531,7 @@ namespace TootTallyLeaderboard
             }
             var image = GameObjectFactory.CreateClickableImageHolder(_tabs.transform, Vector2.zero, Vector2.one * 40f, AssetManager.GetSprite("folder64.png"), "Open Folder Button",
                 Theme.colors.leaderboard.tabs.normalColor, Theme.colors.leaderboard.tabs.highlightedColor, OpenSongFolder);
+            image.GetComponent<Image>().color = Theme.colors.leaderboard.tabs.normalColor;
             _tabs.SetActive(true);
         }
 

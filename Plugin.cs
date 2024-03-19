@@ -64,7 +64,6 @@ namespace TootTallyLeaderboard
             {
                 ShowLeaderboard = Config.Bind("General", "Show Leaderboard", true, "Show TootTally Leaderboard on Song Select."),
                 ShowCoolS = Config.Bind("General", "Show Cool S", false, "Show special graphic when getting SS and SSS on a song."),
-                ChangePitchSpeed = Config.Bind("General", "Change Pitch Speed", false, "Change the pitch on speed changes."),
                 SubmitScores = Config.Bind("General", "Suibmit Scores", true, "Submit your scores to the Toottally leaderboard."),
                 SessionDate = Config.Bind("General", "Session Date", DateTime.Now.ToString(), "The last time that the session started recording."),
                 SessionStartTT = Config.Bind("General", "TT Session Start", 0f, "The amount of TT you started the session with.")
@@ -72,9 +71,7 @@ namespace TootTallyLeaderboard
 
             TootTallySettings.Plugin.MainTootTallySettingPage.AddToggle("Show Leaderboard", option.ShowLeaderboard);
             TootTallySettings.Plugin.MainTootTallySettingPage.AddToggle("Show Cool S", option.ShowCoolS);
-            TootTallySettings.Plugin.MainTootTallySettingPage.AddToggle("Change Pitch Speed", option.ChangePitchSpeed);
             TootTallySettings.Plugin.MainTootTallySettingPage.AddToggle("Submit Scores", option.SubmitScores);
-
             AssetManager.LoadAssets(Path.Combine(Path.GetDirectoryName(Instance.Info.Location), "Assets"));
 
             ShouldUpdateSession = Plugin.Instance.option.SessionDate.Value.CompareTo(DateTime.Now.ToString()) < 0;
@@ -96,7 +93,6 @@ namespace TootTallyLeaderboard
         {
             public ConfigEntry<bool> ShowLeaderboard { get; set; }
             public ConfigEntry<bool> ShowCoolS { get; set; }
-            public ConfigEntry<bool> ChangePitchSpeed { get; set; }
             public ConfigEntry<bool> SubmitScores { get; set; }
             public ConfigEntry<string> SessionDate { get; set; }
             public ConfigEntry<float> SessionStartTT { get; set; }

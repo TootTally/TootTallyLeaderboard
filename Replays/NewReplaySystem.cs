@@ -63,7 +63,7 @@ namespace TootTallyLeaderboard.Replays
             if (track is CustomTrack)
                 _replayData.songhash = SongDataHelper.GetSongHash(track);
             else
-                _replayData.songhash = SongDataHelper.CalcSHA256Hash(Encoding.UTF8.GetBytes(SongDataHelper.GenerateBaseTmb(track)));
+                _replayData.songhash = track.trackref;
 
             _currentFrame = new dynamic[5];
             _currentNote = new dynamic[9];
