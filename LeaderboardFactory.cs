@@ -303,7 +303,7 @@ namespace TootTallyLeaderboard
             if (scoreData.is_rated)
             {
 
-                rowEntry.maxcombo.text = (int)scoreData.tt + "tt";
+                rowEntry.maxcombo.text = Mathf.RoundToInt(scoreData.tt) + "tt";
                 rowEntry.maxcombo.gameObject.AddComponent<BubblePopupHandler>().Initialize(GameObjectFactory.CreateBubble(new Vector2(150, 75), $"{rowEntry.name}ComboBubble", $"{scoreData.max_combo} combo", 10, true));
             }
             else
