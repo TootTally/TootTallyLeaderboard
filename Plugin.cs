@@ -74,7 +74,7 @@ namespace TootTallyLeaderboard
             TootTallySettings.Plugin.MainTootTallySettingPage.AddToggle("Submit Scores", option.SubmitScores);
             AssetManager.LoadAssets(Path.Combine(Path.GetDirectoryName(Instance.Info.Location), "Assets"));
 
-            ShouldUpdateSession = DateTime.Compare(DateTime.Parse(Instance.option.SessionDate.Value).Date, DateTime.Now.Date) < 0;
+            ShouldUpdateSession = DateTime.Parse(Instance.option.SessionDate.Value).Date.CompareTo(DateTime.Now.Date) < 0;
 
             _harmony.PatchAll(typeof(LeaderboardFactory));
             _harmony.PatchAll(typeof(ReplaySystemManager));
