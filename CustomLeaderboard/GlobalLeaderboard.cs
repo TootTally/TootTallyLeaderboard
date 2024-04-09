@@ -14,6 +14,7 @@ using TootTallyCore.Utils.Assets;
 using TootTallyCore.Utils.Helpers;
 using TootTallyCore.Utils.TootTallyGlobals;
 using TootTallyCore.Utils.TootTallyNotifs;
+using TootTallyDiffCalcLibs;
 using TrombLoader.CustomTracks;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -67,6 +68,7 @@ namespace TootTallyLeaderboard
             _levelSelectControllerInstance = __instance;
             _currentLeaderboardCoroutines = new List<IEnumerator<UnityWebRequestAsyncOperation>>();
             _scoreGameObjectList = new List<LeaderboardRowEntry>();
+            _speedToDiffDict = new Dictionary<int, float>();
             ClearBaseLeaderboard();
             CustomizeGameMenuUI(__instance);
 
@@ -299,24 +301,21 @@ namespace TootTallyLeaderboard
                 }
             }
 
-
-            if (_songData != null && _speedToDiffDict != null)
+            float diff;
+            if (_songData != null)
             {
-                float diff = _songData.is_rated ? _speedToDiffDict[(int)_gameSpeedSlider.value] : _speedToDiffDict[1];
+                diff = _songData.is_rated ? _speedToDiffDict[(int)_gameSpeedSlider.value] : _speedToDiffDict[1];
                 _diffRating.text = diff.ToString("0.0");
-
-                int roundedUpStar = (int)Mathf.Clamp(diff + 1, 1, 10);
-                int roundedDownStar = (int)Mathf.Clamp(diff, 0, 9);
-                _starMaskAnimation.SetStartVector(_diffRatingMaskRectangle.sizeDelta);
-                _starRatingMaskSizeTarget = new Vector2(EasingHelper.Lerp(_starSizeDeltaPositions[roundedUpStar], _starSizeDeltaPositions[roundedDownStar], roundedUpStar - diff), 30);
-
             }
             else
             {
-                _diffRating.text = "NA";
-                _starMaskAnimation.SetStartVector(_diffRatingMaskRectangle.sizeDelta);
-                _starRatingMaskSizeTarget = new Vector2(_starSizeDeltaPositions[0], 30);
+                diff = DiffCalcGlobals.selectedChart.GetDiffRating(TootTallyGlobalVariables.gameSpeedMultiplier);
+                _diffRating.text = $"~{diff:0.0}";
             }
+            int roundedUpStar = (int)Mathf.Clamp(diff + 1, 1, 10);
+            int roundedDownStar = (int)Mathf.Clamp(diff, 0, 9);
+            _starMaskAnimation.SetStartVector(_diffRatingMaskRectangle.sizeDelta);
+            _starRatingMaskSizeTarget = new Vector2(EasingHelper.Lerp(_starSizeDeltaPositions[roundedUpStar], _starSizeDeltaPositions[roundedDownStar], roundedUpStar - diff), 30);
         }
 
         public void UpdateLeaderboard(LevelSelectController __instance, List<SingleTrackData> ___alltrackslist, Action<LeaderboardState> callback)
@@ -332,32 +331,28 @@ namespace TootTallyLeaderboard
 
             if (_currentLeaderboardCoroutines.Count != 0) CancelAndClearAllCoroutineInList();
 
-            //TootTallyAPIService.GetLocalChartRatings(SongDataHelper.GetSongFilePath(track), chart => _localSongData = chart);
-
             _currentLeaderboardCoroutines.Add(TootTallyAPIService.GetHashInDB(songHash, track is CustomTrack, songHashInDB =>
             {
+                _songData = null;
+                _scoreDataList = null;
                 if (songHashInDB == 0)
                 {
                     _errorText.text = ERROR_NO_SONGHASH_FOUND_TEXT;
+                    if (DiffCalcGlobals.selectedChart.trackRef != "")
+                        _diffRating.text = $"~{DiffCalcGlobals.selectedChart.GetDiffRating(TootTallyGlobalVariables.gameSpeedMultiplier):0.0}";
+                    else
+                        _diffRating.text = "NA";
                     callback(LeaderboardState.ErrorNoSongHashFound);
-                    _diffRating.text = "NA";
-                    _starMaskAnimation.SetStartVector(_diffRatingMaskRectangle.sizeDelta);
-                    _starRatingMaskSizeTarget = new Vector2(_starSizeDeltaPositions[0], 30);
                     return; // Skip if no song found
                 }
                 else
                     _currentSelectedSongHash = songHashInDB;
-                //_localSongData = null;
-                _songData = null;
-                _scoreDataList = null;
-                _speedToDiffDict = null;
                 _currentLeaderboardCoroutines.Add(TootTallyAPIService.GetSongDataFromDB(songHashInDB, songData =>
                 {
                     if (songData != null)
                         OnSongInfoReceived(songData);
-                    else
-                        _speedToDiffDict = null;
                     UpdateStarRating(__instance);
+
 
                     if (_scoreDataList != null)
                         CancelAndClearAllCoroutineInList();
@@ -388,27 +383,22 @@ namespace TootTallyLeaderboard
         public void OnSongInfoReceived(SerializableClass.SongDataFromDB songData)
         {
             _songData = songData;
-            _speedToDiffDict = new Dictionary<int, float>();
-            if (songData.is_rated)
+            _speedToDiffDict.Clear();
+            _ratedIcon.SetActive(songData.is_rated);
+            for (int i = 0; i <= 29; i++)
             {
-                _ratedIcon.SetActive(true);
-                for (int i = 0; i <= 29; i++)
-                {
-                    float diffIndex = (int)(i / 5f);
-                    float diffMin = diffIndex * .25f + .5f;
-                    float diffMax = (diffIndex + 1f) * .25f + .5f;
-                    float currentGameSpeed = i * .05f + .5f;
+                float diffIndex = (int)(i / 5f);
+                float diffMin = diffIndex * .25f + .5f;
+                float diffMax = (diffIndex + 1f) * .25f + .5f;
+                float currentGameSpeed = i * .05f + .5f;
 
-                    float by = (currentGameSpeed - diffMin) / (diffMax - diffMin);
+                float by = (currentGameSpeed - diffMin) / (diffMax - diffMin);
 
-                    float diff = EasingHelper.Lerp(_songData.speed_diffs[(int)diffIndex], _songData.speed_diffs[(int)diffIndex + 1], by);
+                float diff = EasingHelper.Lerp(_songData.speed_diffs[(int)diffIndex], _songData.speed_diffs[(int)diffIndex + 1], by);
 
-                    _speedToDiffDict.Add(i, diff);
-                }
-                _speedToDiffDict.Add(30, _songData.speed_diffs.Last());
+                _speedToDiffDict.Add(i, diff);
             }
-            else
-                _speedToDiffDict.Add(1, _songData.difficulty);
+            _speedToDiffDict.Add(30, _songData.speed_diffs.Last());
         }
 
         public void ShowLoadingSwirly() => _loadingSwirly.Show();
@@ -476,7 +466,7 @@ namespace TootTallyLeaderboard
 
         public void CancelAndClearAllCoroutineInList()
         {
-            _currentLeaderboardCoroutines.ForEach(routine => Plugin.Instance.StopCoroutine(routine));
+            _currentLeaderboardCoroutines.ForEach(Plugin.Instance.StopCoroutine);
             _currentLeaderboardCoroutines.Clear();
         }
 

@@ -4,14 +4,11 @@ using System.IO;
 using BaboonAPI.Hooks.Tracks;
 using BepInEx;
 using HarmonyLib;
-using Newtonsoft.Json.Linq;
 using TMPro;
 using TootTallyAccounts;
-using TootTallyCore;
 using TootTallyCore.APIServices;
 using TootTallyCore.Graphics;
 using TootTallyCore.Graphics.Animations;
-using TootTallyCore.Utils;
 using TootTallyCore.Utils.Assets;
 using TootTallyCore.Utils.Helpers;
 using TootTallyCore.Utils.TootTallyGlobals;
@@ -595,20 +592,20 @@ namespace TootTallyLeaderboard.Replays
             if (CircularBreathingCompatibility.enabled && CircularBreathingCompatibility.IsActivated)
             {
                 Plugin.LogInfo("CircularBreathing used, skipping replay submission.");
-                TootTallyNotifManager.DisplayWarning("Circular Breathing enabled, Score submission disabled.");
+                TootTallyNotifManager.DisplayNotif("Circular Breathing enabled, Score submission disabled.");
                 return false; // Don't submit anything if Circular Breathing is enabled
             }
             if (_hasPaused)
             {
                 Plugin.LogInfo("Paused during gameplay, skipping replay submission.");
-                TootTallyNotifManager.DisplayWarning("Pausing not allowed, Score submission disabled.");
+                TootTallyNotifManager.DisplayNotif("Pausing not allowed, Score submission disabled.");
                 return false; //Don't submit if paused during the play
             }
 
             if (_replayUUID == null)
             {
                 Plugin.LogInfo("Replay UUID was null, skipping replay submission.");
-                TootTallyNotifManager.DisplayWarning("Replay UUID was null, skipping replay submission.");
+                TootTallyNotifManager.DisplayNotif("Replay UUID was null, skipping replay submission.");
                 return false; //Dont save or upload if no UUID
             }
             if (GameModifierManager.GetModifiersString().Contains("BT"))
