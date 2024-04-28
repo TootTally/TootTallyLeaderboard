@@ -393,13 +393,12 @@ namespace TootTallyLeaderboard.Replays
         [HarmonyPostfix]
         static void PauseCanvasAddWarning(PauseCanvasController __instance)
         {
-            _toottallyPauseWarning = GameObject.Instantiate(__instance.control_hint_box, __instance.panelobj.transform.parent);
-            if (_toottallyPauseWarning.TryGetComponent(out LocalizeStringEvent locEvent))
-                GameObject.DestroyImmediate(locEvent);
+            _toottallyPauseWarning = GameObject.Instantiate(__instance.control_hint_box, __instance.panelobj.transform.parent);            
             _toottallyPauseWarning.transform.localScale = new Vector3(0, 0, 1);
             var rect = _toottallyPauseWarning.GetComponent<RectTransform>();
             rect.sizeDelta = new Vector2(210, 46);
-            rect.anchorMin = rect.anchorMax = new Vector2(.65f, .6f);
+            rect.anchorMin = rect.anchorMax =  new Vector2(.5f, .18f);
+            rect.pivot = new Vector2(.5f, .5f);
             _toottallyPauseWarning.GetComponent<Image>().color = new Color(.1f, .1f, 0, .5f);
             var border = _toottallyPauseWarning.transform.GetChild(0).gameObject;
             border.GetComponent<Image>().color = new Color(1, 1, 0, .3f);
@@ -407,11 +406,15 @@ namespace TootTallyLeaderboard.Replays
             GameObjectFactory.DestroyFromParent(border, "Image (2)");
             GameObjectFactory.DestroyFromParent(border, "Image (3)");
             GameObjectFactory.DestroyFromParent(border, "txt-track-vol");
+            
             var text = border.transform.Find("txt-quick-restart").GetComponent<Text>();
+            if (text.TryGetComponent(out LocalizeStringEvent locEvent))
+                GameObject.DestroyImmediate(locEvent);
             text.text = "Scores will not submit if you pause";
             text.fontSize = 8;
             text.rectTransform.anchoredPosition = Vector2.zero;
-            text.rectTransform.anchorMin = text.rectTransform.anchorMax = new Vector2(.1f, .55f);
+            text.rectTransform.anchorMin = text.rectTransform.anchorMax = new Vector2(.1f, .5f);
+            text.rectTransform.sizeDelta = new Vector2(180, 0);
         }
 
 
