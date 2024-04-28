@@ -331,10 +331,12 @@ namespace TootTallyLeaderboard
 
             if (_currentLeaderboardCoroutines.Count != 0) CancelAndClearAllCoroutineInList();
 
+            _songData = null;
+            _scoreDataList = null;
+
             _currentLeaderboardCoroutines.Add(TootTallyAPIService.GetHashInDB(songHash, track is CustomTrack, songHashInDB =>
             {
-                _songData = null;
-                _scoreDataList = null;
+                
                 if (songHashInDB == 0)
                 {
                     _errorText.text = ERROR_NO_SONGHASH_FOUND_TEXT;
@@ -342,6 +344,7 @@ namespace TootTallyLeaderboard
                         _diffRating.text = $"~{DiffCalcGlobals.selectedChart.GetDiffRating(TootTallyGlobalVariables.gameSpeedMultiplier):0.0}";
                     else
                         _diffRating.text = "NA";
+                    UpdateStarRating(__instance);
                     callback(LeaderboardState.ErrorNoSongHashFound);
                     return; // Skip if no song found
                 }
@@ -478,7 +481,8 @@ namespace TootTallyLeaderboard
         public void OpenSongLeaderboard() => Application.OpenURL("https://toottally.com/song/" + _currentSelectedSongHash);
         public void OpenSongFolder()
         {
-            var track = TrackLookup.lookup(_songData.track_ref);
+            var trackref = _songData != null ? _songData.track_ref : DiffCalcGlobals.selectedChart.trackRef;
+            var track = TrackLookup.lookup(trackref);
             string path;
             if (track is CustomTrack ct)
                 path = ct.folderPath;
