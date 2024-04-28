@@ -396,6 +396,7 @@ namespace TootTallyLeaderboard.Replays
             _toottallyPauseWarning = GameObject.Instantiate(__instance.control_hint_box, __instance.panelobj.transform.parent);            
             _toottallyPauseWarning.transform.localScale = new Vector3(0, 0, 1);
             var rect = _toottallyPauseWarning.GetComponent<RectTransform>();
+            rect.anchoredPosition = Vector2.zero;
             rect.sizeDelta = new Vector2(210, 46);
             rect.anchorMin = rect.anchorMax =  new Vector2(.5f, .18f);
             rect.pivot = new Vector2(.5f, .5f);
