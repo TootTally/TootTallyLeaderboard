@@ -318,14 +318,16 @@ namespace TootTallyLeaderboard
             _starRatingMaskSizeTarget = new Vector2(EasingHelper.Lerp(_starSizeDeltaPositions[roundedUpStar], _starSizeDeltaPositions[roundedDownStar], roundedUpStar - diff), 30);
         }
 
+        private static string _savedTrackref;
+
         public void UpdateLeaderboard(LevelSelectController __instance, List<SingleTrackData> ___alltrackslist, Action<LeaderboardState> callback)
         {
             _globalLeaderboard.SetActive(true); //for some reasons its needed to display the leaderboard
             _ratedIcon.SetActive(false);
             _scrollableSliderHandler.ResetAcceleration();
 
-            var trackRef = ___alltrackslist[_levelSelectControllerInstance.songindex].trackref;
-            var track = TrackLookup.lookup(trackRef);
+            _savedTrackref = ___alltrackslist[_levelSelectControllerInstance.songindex].trackref;
+            var track = TrackLookup.lookup(_savedTrackref);
             var songHash = SongDataHelper.GetSongHash(track);
 
 
@@ -481,8 +483,10 @@ namespace TootTallyLeaderboard
         public void OpenSongLeaderboard() => Application.OpenURL("https://toottally.com/song/" + _currentSelectedSongHash);
         public void OpenSongFolder()
         {
-            var trackref = _songData != null ? _songData.track_ref : DiffCalcGlobals.selectedChart.trackRef;
+            var trackref = _savedTrackref != null ? _savedTrackref :  
+                           DiffCalcGlobals.selectedChart.trackRef;
             var track = TrackLookup.lookup(trackref);
+            if (track == null) return;
             string path;
             if (track is CustomTrack ct)
                 path = ct.folderPath;
