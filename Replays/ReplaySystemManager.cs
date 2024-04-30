@@ -624,6 +624,13 @@ namespace TootTallyLeaderboard.Replays
                 return false;
             }
 
+            if (!TootTallyGlobalVariables.allowSubmit)
+            {
+                TootTallyNotifManager.DisplayWarning("TTCore preventing score submit, skipping replay submission.");
+                Plugin.LogInfo("TTCore preventing score submit, allowSubmit is false, skipping replay submission.");
+                return false;
+            }
+
             if (!TootTallyUser.userInfo.allowSubmit)
             {
                 TootTallyNotifManager.DisplayWarning("Unexpected error occured while submitting, skipping replay submission.");
