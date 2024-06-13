@@ -342,6 +342,7 @@ namespace TootTallyLeaderboard
                 if (songHashInDB == 0)
                 {
                     _errorText.text = ERROR_NO_SONGHASH_FOUND_TEXT;
+                    Plugin.LogInfo($" - {DiffCalcGlobals.selectedChart.trackRef}");
                     if (DiffCalcGlobals.selectedChart.trackRef != "")
                         _diffRating.text = $"~{DiffCalcGlobals.selectedChart.GetDiffRating(TootTallyGlobalVariables.gameSpeedMultiplier):0.0}";
                     else

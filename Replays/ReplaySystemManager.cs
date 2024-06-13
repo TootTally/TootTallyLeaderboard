@@ -624,6 +624,12 @@ namespace TootTallyLeaderboard.Replays
                 return false;
             }
 
+            if (TootTallyGlobalVariables.isPracticing)
+            {
+                Plugin.LogInfo("Practice mode enabled, skipping replay submission.");
+                return false;
+            }
+
             if (!TootTallyGlobalVariables.allowSubmit)
             {
                 TootTallyNotifManager.DisplayWarning("TTCore preventing score submit, skipping replay submission.");
