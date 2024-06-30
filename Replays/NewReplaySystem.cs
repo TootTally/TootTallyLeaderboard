@@ -13,6 +13,7 @@ using TootTallyCore.Utils.TootTallyGlobals;
 using TootTallyCore.Utils.TootTallyNotifs;
 using TootTallyGameModifiers;
 using TrombLoader.CustomTracks;
+using TrombLoader.Data;
 using UnityEngine;
 
 namespace TootTallyLeaderboard.Replays
@@ -45,6 +46,7 @@ namespace TootTallyLeaderboard.Replays
         public bool IsTripleS { get => GlobalVariables.gameplay_notescores[0] == 0 && GlobalVariables.gameplay_notescores[1] == 0 && GlobalVariables.gameplay_notescores[2] == 0 && GlobalVariables.gameplay_notescores[3] == 0; }
 
         public bool GetIsOldReplay => TootTallyGlobalVariables.isOldReplay;
+        public BackgroundPuppetController _backgroundPuppetController;
 
         public NewReplaySystem()
         {
@@ -347,6 +349,9 @@ namespace TootTallyLeaderboard.Replays
 
                 SetCursorPosition(__instance, newCursorPosition);
                 __instance.puppet_humanc.doPuppetControl(-newCursorPosition / 225); //225 is half of the Gameplay area:450
+                if (_backgroundPuppetController) {
+                    _backgroundPuppetController.DoPuppetControl(-newCursorPosition / 225, __instance.vibratoamt);
+                }
             }
             else
                 SetCursorPosition(__instance, (float)_currentFrame[(int)FDStruct.P]);

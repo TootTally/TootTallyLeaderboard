@@ -16,6 +16,7 @@ using TootTallyCore.Utils.TootTallyNotifs;
 using TootTallyGameModifiers;
 using TootTallyLeaderboard.Compatibility;
 using TrombLoader.CustomTracks;
+using TrombLoader.Data;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Localization.Components;
@@ -95,6 +96,9 @@ namespace TootTallyLeaderboard.Replays
 
             _pausePointerAnimation = new SecondDegreeDynamicsAnimation(2.5f, 1f, 0.85f);
 
+            GameObject _bg = __instance.bgcontroller.fullbgobject;
+            if (_bg) 
+                _replay._backgroundPuppetController = _bg.GetComponent<BackgroundPuppetController>();
         }
 
         [HarmonyPatch(typeof(GameController), nameof(GameController.buildNotes))]
