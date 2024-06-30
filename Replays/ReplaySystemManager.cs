@@ -96,7 +96,8 @@ namespace TootTallyLeaderboard.Replays
             else
             {
                 OnReplayingStart();
-                SetReplayUI(__instance);
+                if (!Plugin.Instance.option.ShowcaseMode.Value)
+                    SetReplayUI(__instance);
             }
 
             _pausePointerAnimation = new SecondDegreeDynamicsAnimation(2.5f, 1f, 0.85f);

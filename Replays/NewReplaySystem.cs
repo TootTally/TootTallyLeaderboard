@@ -332,7 +332,10 @@ namespace TootTallyLeaderboard.Replays
 
         public void PlaybackReplay(GameController __instance, float time)
         {
-            Cursor.visible = true;
+            if (Plugin.Instance.option.ShowcaseMode.Value)
+                Cursor.visible = false;
+            else
+                Cursor.visible = true;
             __instance.previous_high_score_surpassed = true; // prevents the new high score yellow highlight from appearing
             if (!__instance.controllermode) __instance.controllermode = true; //Still required to not make the mouse position update
 
