@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using HarmonyLib;
 using BaboonAPI.Hooks.Tracks;
 using BepInEx;
 using Newtonsoft.Json;
@@ -13,6 +14,7 @@ using TootTallyCore.Utils.TootTallyGlobals;
 using TootTallyCore.Utils.TootTallyNotifs;
 using TootTallyGameModifiers;
 using TrombLoader.CustomTracks;
+using TrombLoader.Data;
 using UnityEngine;
 
 namespace TootTallyLeaderboard.Replays
@@ -33,9 +35,10 @@ namespace TootTallyLeaderboard.Replays
 
         private bool _wasTouchScreenUsed;
         private bool _wasTabletUsed;
-        private bool _isTooting;
         private int _maxCombo;
         private bool _isLastNote;
+        public bool _isTooting;
+        public Vector3 _mousePos;
         public bool GetIsTooting { get => _isTooting; }
 
         public string GetUsername { get => _replayData.username; }
@@ -45,6 +48,9 @@ namespace TootTallyLeaderboard.Replays
         public bool IsTripleS { get => GlobalVariables.gameplay_notescores[0] == 0 && GlobalVariables.gameplay_notescores[1] == 0 && GlobalVariables.gameplay_notescores[2] == 0 && GlobalVariables.gameplay_notescores[3] == 0; }
 
         public bool GetIsOldReplay => TootTallyGlobalVariables.isOldReplay;
+        public BackgroundPuppetController _backgroundPuppetController;
+        public int ScreenWidth {get => _replayData.screenwidth; }
+        public int ScreenHeight {get => _replayData.screenheight; }
 
         public NewReplaySystem()
         {
@@ -69,6 +75,8 @@ namespace TootTallyLeaderboard.Replays
             _currentFrame = new dynamic[5];
             _currentNote = new dynamic[9];
             _currentToot = new dynamic[3];
+            _replayData.screenwidth = Screen.width;
+            _replayData.screenheight = Screen.height;
             Plugin.LogInfo("Started recording replay");
         }
 
@@ -239,6 +247,12 @@ namespace TootTallyLeaderboard.Replays
 
             var replayVersion = JsonConvert.DeserializeObject<ReplayVersion>(jsonFileFromZip).version;
             _replayData = JsonConvert.DeserializeObject<ReplayData>(jsonFileFromZip);
+            if (_replayData.screenwidth == 0 || _replayData.screenheight == 0)
+            {
+                _replayData.screenwidth = 1920;
+                _replayData.screenheight = 1080;
+            }
+
             TootTallyGlobalVariables.isOldReplay = IsOldReplayFormat(replayVersion);
             if (GetIsOldReplay)
             {
@@ -318,7 +332,11 @@ namespace TootTallyLeaderboard.Replays
 
         public void PlaybackReplay(GameController __instance, float time)
         {
-            Cursor.visible = true;
+            if (Plugin.Instance.option.ShowcaseMode.Value)
+                Cursor.visible = false;
+            else
+                Cursor.visible = true;
+            __instance.previous_high_score_surpassed = true; // prevents the new high score yellow highlight from appearing
             if (!__instance.controllermode) __instance.controllermode = true; //Still required to not make the mouse position update
 
             if (GetIsOldReplay)
@@ -343,12 +361,19 @@ namespace TootTallyLeaderboard.Replays
             {
                 var by = (time - (float)_lastFrame[(int)FDStruct.T]) / ((float)_currentFrame[(int)FDStruct.T] - (float)_lastFrame[(int)FDStruct.T]);
                 var newCursorPosition = EasingHelper.Lerp((float)_lastFrame[(int)FDStruct.P], (float)_currentFrame[(int)FDStruct.P], by);
+                var newMousePositionX = EasingHelper.Lerp((float)_lastFrame[(int)FDStruct.MX], (float)_currentFrame[(int)FDStruct.MX], by);
+                var newMousePositionY = EasingHelper.Lerp((float)_lastFrame[(int)FDStruct.MY], (float)_currentFrame[(int)FDStruct.MY], by);
 
                 SetCursorPosition(__instance, newCursorPosition);
+                _mousePos = new(newMousePositionX, newMousePositionY, 0f);
                 __instance.puppet_humanc.doPuppetControl(-newCursorPosition / 225); //225 is half of the Gameplay area:450
+                if (_backgroundPuppetController) {
+                    _backgroundPuppetController.DoPuppetControl(-newCursorPosition / 225, __instance.vibratoamt);
+                }
             }
             else
                 SetCursorPosition(__instance, (float)_currentFrame[(int)FDStruct.P]);
+                _mousePos = new((float)_currentFrame[(int)FDStruct.MX], (float)_currentFrame[(int)FDStruct.MY], 0f);
         }
 
         private void PlaybackTimeFrameData(float time)
@@ -455,6 +480,8 @@ namespace TootTallyLeaderboard.Replays
             public List<dynamic[]> framedata { get; set; }
             public List<dynamic[]> notedata { get; set; }
             public List<dynamic[]> tootdata { get; set; }
+            public int screenwidth { get; set; }
+            public int screenheight { get; set; }
 
             public ReplayData(float sampleRate)
             {
@@ -467,6 +494,8 @@ namespace TootTallyLeaderboard.Replays
                 audiolatency = GlobalVariables.localsettings.latencyadjust;
                 gameversion = Application.version;
                 samplerate = sampleRate;
+                screenwidth = 0;
+                screenheight = 0;
             }
 
             public void ClearData()

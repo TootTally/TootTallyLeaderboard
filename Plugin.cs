@@ -66,12 +66,14 @@ namespace TootTallyLeaderboard
                 ShowCoolS = Config.Bind("General", "Show Cool S", false, "Show special graphic when getting SS and SSS on a song."),
                 SubmitScores = Config.Bind("General", "Suibmit Scores", true, "Submit your scores to the Toottally leaderboard."),
                 SessionDate = Config.Bind("General", "Session Date", DateTime.Now.ToString(), "The last time that the session started recording."),
-                SessionStartTT = Config.Bind("General", "TT Session Start", 0f, "The amount of TT you started the session with.")
+                SessionStartTT = Config.Bind("General", "TT Session Start", 0f, "The amount of TT you started the session with."),
+                ShowcaseMode = Config.Bind("General", "Replay Showcase Mode", false, "Hides the replay HUD and mouse cursor when viewing a replay.")
             };
 
             TootTallySettings.Plugin.MainTootTallySettingPage.AddToggle("Show Leaderboard", option.ShowLeaderboard);
             TootTallySettings.Plugin.MainTootTallySettingPage.AddToggle("Show Cool S", option.ShowCoolS);
             TootTallySettings.Plugin.MainTootTallySettingPage.AddToggle("Submit Scores", option.SubmitScores);
+            TootTallySettings.Plugin.MainTootTallySettingPage.AddToggle("Replay Showcase Mode", option.ShowcaseMode);
             AssetManager.LoadAssets(Path.Combine(Path.GetDirectoryName(Instance.Info.Location), "Assets"));
 
             ShouldUpdateSession = DateTime.Parse(Instance.option.SessionDate.Value).Date.CompareTo(DateTime.Now.Date) < 0;
@@ -96,6 +98,7 @@ namespace TootTallyLeaderboard
             public ConfigEntry<bool> SubmitScores { get; set; }
             public ConfigEntry<string> SessionDate { get; set; }
             public ConfigEntry<float> SessionStartTT { get; set; }
+            public ConfigEntry<bool> ShowcaseMode { get; set; }
         }
     }
 }
