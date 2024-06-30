@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.InteropServices;
 using BaboonAPI.Hooks.Tracks;
 using BepInEx;
 using HarmonyLib;
@@ -57,6 +58,9 @@ namespace TootTallyLeaderboard.Replays
         private static GameObject _pauseArrow;
         private static Vector2 _pauseArrowDestination;
 
+        private static GameObject _bg;
+        private static TromboneEventManager[] _eventManagers;
+
         private static GameObject _tootTallyScorePanel;
         private static LoadingIcon _loadingSwirly;
         private static LevelSelectController _currentLevelSelectInstance;
@@ -96,9 +100,10 @@ namespace TootTallyLeaderboard.Replays
 
             _pausePointerAnimation = new SecondDegreeDynamicsAnimation(2.5f, 1f, 0.85f);
 
-            GameObject _bg = __instance.bgcontroller.fullbgobject;
+            _bg = __instance.bgcontroller.fullbgobject;
             if (_bg) 
                 _replay._backgroundPuppetController = _bg.GetComponent<BackgroundPuppetController>();
+                _eventManagers = _bg.GetComponentsInChildren<TromboneEventManager>();
         }
 
         [HarmonyPatch(typeof(GameController), nameof(GameController.buildNotes))]
@@ -496,6 +501,18 @@ namespace TootTallyLeaderboard.Replays
         public static void OnLevelselectControllerStartInstantiateReplay(LevelSelectController __instance)
         {
             _currentLevelSelectInstance = __instance;
+        }
+
+        [HarmonyPatch(typeof(TromboneEventManager), nameof(TromboneEventManager.Update))]
+        [HarmonyPostfix]
+        public static void TromboneEventManagerPostfix(TromboneEventManager __instance)
+        {
+            if (_replayManagerState == ReplayManagerState.Replaying || _replayManagerState == ReplayManagerState.Paused)
+            {
+                Traverse.Create(__instance).Field("mousePosition").SetValue(_replay._mousePos);
+                __instance.MousePositionUpdated.Invoke(new Vector3(_replay._mousePos.x / (float)_replay.ScreenWidth, _replay._mousePos.y / (float)_replay.ScreenHeight, 0f));
+            }
+            
         }
 
         #endregion
