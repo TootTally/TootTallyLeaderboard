@@ -222,24 +222,36 @@ namespace TootTallyLeaderboard.Replays
             if (!modifiers.ToLower().Contains("none"))
                 __instance.txt_trackname.text += $" [{modifiers}]";
 
-            GameObject lowerRightPanel = __instance.yellowwave.transform.parent.gameObject;
+            if (wasPlayingReplay)
+            {
+                __instance.prevhigh = GlobalVariables.gameplay_scoretotal; // prevents the new high score text from showing
+                __instance.txt_prevhigh.text = _replay.GetUsername;
+                GameObject prevHighLabel = GameObject.Find("Canvas/FullPanel/LeftLabels/PREV. HI SCORE");
+                Text[] prevHighLabelText = prevHighLabel.GetComponentsInChildren<Text>();
+                foreach (Text text in prevHighLabelText)
+                {
+                    text.text = "Player"; // TODO: this should probably be localised at some point in the future
+                }
+            } else {
+                GameObject lowerRightPanel = __instance.yellowwave.transform.parent.gameObject;
 
-            GameObject UICanvas = lowerRightPanel.transform.parent.gameObject;
+                GameObject UICanvas = lowerRightPanel.transform.parent.gameObject;
 
-            GameObject ttHitbox = LeaderboardFactory.CreateDefaultPanel(UICanvas.transform, new Vector2(365, -23), new Vector2(56, 112), "ScorePanelHitbox");
-            GameObjectFactory.CreateSingleText(ttHitbox.transform, "ScorePanelHitboxText", "<", GameObjectFactory.TextFont.Multicolore);
+                GameObject ttHitbox = LeaderboardFactory.CreateDefaultPanel(UICanvas.transform, new Vector2(365, -23), new Vector2(56, 112), "ScorePanelHitbox");
+                GameObjectFactory.CreateSingleText(ttHitbox.transform, "ScorePanelHitboxText", "<", GameObjectFactory.TextFont.Multicolore);
 
-            GameObject panelBody = LeaderboardFactory.CreateDefaultPanel(UICanvas.transform, new Vector2(750, 0), new Vector2(600, 780), "TootTallyScorePanel");
-            _tootTallyScorePanel = panelBody.transform.Find("scoresbody").gameObject;
-            VerticalLayoutGroup vertLayout = _tootTallyScorePanel.AddComponent<VerticalLayoutGroup>();
-            vertLayout.padding = new RectOffset(2, 2, 2, 2);
-            vertLayout.childAlignment = TextAnchor.MiddleCenter;
-            vertLayout.childForceExpandHeight = vertLayout.childForceExpandWidth = true;
-            _loadingSwirly = GameObjectFactory.CreateLoadingIcon(panelBody.transform, Vector2.zero, new Vector2(128, 128), AssetManager.GetSprite("icon.png"), true, "LoadingSwirly");
-            _loadingSwirly.Show();
-            _loadingSwirly.StartRecursiveAnimation();
+                GameObject panelBody = LeaderboardFactory.CreateDefaultPanel(UICanvas.transform, new Vector2(750, 0), new Vector2(600, 780), "TootTallyScorePanel");
+                _tootTallyScorePanel = panelBody.transform.Find("scoresbody").gameObject;
+                VerticalLayoutGroup vertLayout = _tootTallyScorePanel.AddComponent<VerticalLayoutGroup>();
+                vertLayout.padding = new RectOffset(2, 2, 2, 2);
+                vertLayout.childAlignment = TextAnchor.MiddleCenter;
+                vertLayout.childForceExpandHeight = vertLayout.childForceExpandWidth = true;
+                _loadingSwirly = GameObjectFactory.CreateLoadingIcon(panelBody.transform, Vector2.zero, new Vector2(128, 128), AssetManager.GetSprite("icon.png"), true, "LoadingSwirly");
+                _loadingSwirly.Show();
+                _loadingSwirly.StartRecursiveAnimation();
 
-            new SlideTooltip(ttHitbox, panelBody, new Vector2(750, 0), new Vector2(225, 0));
+                new SlideTooltip(ttHitbox, panelBody, new Vector2(750, 0), new Vector2(225, 0));
+            }
 
         }
 
