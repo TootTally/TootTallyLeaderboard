@@ -35,9 +35,9 @@ namespace TootTallyLeaderboard.Replays
 
         private bool _wasTouchScreenUsed;
         private bool _wasTabletUsed;
-        private bool _isTooting;
         private int _maxCombo;
         private bool _isLastNote;
+        public bool _isTooting;
         public Vector3 _mousePos;
         public bool GetIsTooting { get => _isTooting; }
 
