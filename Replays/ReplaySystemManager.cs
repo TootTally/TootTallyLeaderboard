@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.InteropServices;
 using BaboonAPI.Hooks.Tracks;
 using BepInEx;
 using HarmonyLib;
@@ -16,6 +17,7 @@ using TootTallyCore.Utils.TootTallyNotifs;
 using TootTallyGameModifiers;
 using TootTallyLeaderboard.Compatibility;
 using TrombLoader.CustomTracks;
+using TrombLoader.Data;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Localization.Components;
@@ -56,6 +58,10 @@ namespace TootTallyLeaderboard.Replays
         private static GameObject _pauseArrow;
         private static Vector2 _pauseArrowDestination;
 
+        private static GameObject _bgGameObject;
+        private static TromboneEventManager[] _eventManagers;
+        private static bool _currentInputState = false;
+
         private static GameObject _tootTallyScorePanel;
         private static LoadingIcon _loadingSwirly;
         private static LevelSelectController _currentLevelSelectInstance;
@@ -90,11 +96,16 @@ namespace TootTallyLeaderboard.Replays
             else
             {
                 OnReplayingStart();
-                SetReplayUI(__instance);
+                if (!Plugin.Instance.option.ShowcaseMode.Value)
+                    SetReplayUI(__instance);
             }
 
             _pausePointerAnimation = new SecondDegreeDynamicsAnimation(2.5f, 1f, 0.85f);
 
+            _bgGameObject = __instance.bgcontroller.fullbgobject;
+            if (_bgGameObject)
+                _replay._backgroundPuppetController = _bgGameObject.GetComponent<BackgroundPuppetController>();
+            _eventManagers = _bgGameObject.GetComponentsInChildren<TromboneEventManager>();
         }
 
         [HarmonyPatch(typeof(GameController), nameof(GameController.buildNotes))]
@@ -222,24 +233,36 @@ namespace TootTallyLeaderboard.Replays
             if (!modifiers.ToLower().Contains("none"))
                 __instance.txt_trackname.text += $" [{modifiers}]";
 
-            GameObject lowerRightPanel = __instance.yellowwave.transform.parent.gameObject;
+            if (wasPlayingReplay)
+            {
+                __instance.prevhigh = GlobalVariables.gameplay_scoretotal; // prevents the new high score text from showing
+                __instance.txt_prevhigh.text = _replay.GetUsername;
+                GameObject prevHighLabel = GameObject.Find("Canvas/FullPanel/LeftLabels/PREV. HI SCORE");
+                Text[] prevHighLabelText = prevHighLabel.GetComponentsInChildren<Text>();
+                foreach (Text text in prevHighLabelText)
+                    text.text = "Player"; // TODO: this should probably be localised at some point in the future
+            }
+            else
+            {
+                GameObject lowerRightPanel = __instance.yellowwave.transform.parent.gameObject;
 
-            GameObject UICanvas = lowerRightPanel.transform.parent.gameObject;
+                GameObject UICanvas = lowerRightPanel.transform.parent.gameObject;
 
-            GameObject ttHitbox = LeaderboardFactory.CreateDefaultPanel(UICanvas.transform, new Vector2(365, -23), new Vector2(56, 112), "ScorePanelHitbox");
-            GameObjectFactory.CreateSingleText(ttHitbox.transform, "ScorePanelHitboxText", "<", GameObjectFactory.TextFont.Multicolore);
+                GameObject ttHitbox = LeaderboardFactory.CreateDefaultPanel(UICanvas.transform, new Vector2(365, -23), new Vector2(56, 112), "ScorePanelHitbox");
+                GameObjectFactory.CreateSingleText(ttHitbox.transform, "ScorePanelHitboxText", "<", GameObjectFactory.TextFont.Multicolore);
 
-            GameObject panelBody = LeaderboardFactory.CreateDefaultPanel(UICanvas.transform, new Vector2(750, 0), new Vector2(600, 780), "TootTallyScorePanel");
-            _tootTallyScorePanel = panelBody.transform.Find("scoresbody").gameObject;
-            VerticalLayoutGroup vertLayout = _tootTallyScorePanel.AddComponent<VerticalLayoutGroup>();
-            vertLayout.padding = new RectOffset(2, 2, 2, 2);
-            vertLayout.childAlignment = TextAnchor.MiddleCenter;
-            vertLayout.childForceExpandHeight = vertLayout.childForceExpandWidth = true;
-            _loadingSwirly = GameObjectFactory.CreateLoadingIcon(panelBody.transform, Vector2.zero, new Vector2(128, 128), AssetManager.GetSprite("icon.png"), true, "LoadingSwirly");
-            _loadingSwirly.Show();
-            _loadingSwirly.StartRecursiveAnimation();
+                GameObject panelBody = LeaderboardFactory.CreateDefaultPanel(UICanvas.transform, new Vector2(750, 0), new Vector2(600, 780), "TootTallyScorePanel");
+                _tootTallyScorePanel = panelBody.transform.Find("scoresbody").gameObject;
+                VerticalLayoutGroup vertLayout = _tootTallyScorePanel.AddComponent<VerticalLayoutGroup>();
+                vertLayout.padding = new RectOffset(2, 2, 2, 2);
+                vertLayout.childAlignment = TextAnchor.MiddleCenter;
+                vertLayout.childForceExpandHeight = vertLayout.childForceExpandWidth = true;
+                _loadingSwirly = GameObjectFactory.CreateLoadingIcon(panelBody.transform, Vector2.zero, new Vector2(128, 128), AssetManager.GetSprite("icon.png"), true, "LoadingSwirly");
+                _loadingSwirly.Show();
+                _loadingSwirly.StartRecursiveAnimation();
 
-            new SlideTooltip(ttHitbox, panelBody, new Vector2(750, 0), new Vector2(225, 0));
+                new SlideTooltip(ttHitbox, panelBody, new Vector2(750, 0), new Vector2(225, 0));
+            }
 
         }
 
@@ -393,12 +416,12 @@ namespace TootTallyLeaderboard.Replays
         [HarmonyPostfix]
         static void PauseCanvasAddWarning(PauseCanvasController __instance)
         {
-            _toottallyPauseWarning = GameObject.Instantiate(__instance.control_hint_box, __instance.panelobj.transform.parent);            
+            _toottallyPauseWarning = GameObject.Instantiate(__instance.control_hint_box, __instance.panelobj.transform.parent);
             _toottallyPauseWarning.transform.localScale = new Vector3(0, 0, 1);
             var rect = _toottallyPauseWarning.GetComponent<RectTransform>();
             rect.anchoredPosition = Vector2.zero;
             rect.sizeDelta = new Vector2(210, 46);
-            rect.anchorMin = rect.anchorMax =  new Vector2(.5f, .18f);
+            rect.anchorMin = rect.anchorMax = new Vector2(.5f, .18f);
             rect.pivot = new Vector2(.5f, .5f);
             _toottallyPauseWarning.GetComponent<Image>().color = new Color(.1f, .1f, 0, .5f);
             var border = _toottallyPauseWarning.transform.GetChild(0).gameObject;
@@ -407,7 +430,7 @@ namespace TootTallyLeaderboard.Replays
             GameObjectFactory.DestroyFromParent(border, "Image (2)");
             GameObjectFactory.DestroyFromParent(border, "Image (3)");
             GameObjectFactory.DestroyFromParent(border, "txt-track-vol");
-            
+
             var text = border.transform.Find("txt-quick-restart").GetComponent<Text>();
             if (text.TryGetComponent(out LocalizeStringEvent locEvent))
                 GameObject.DestroyImmediate(locEvent);
@@ -480,6 +503,39 @@ namespace TootTallyLeaderboard.Replays
         public static void OnLevelselectControllerStartInstantiateReplay(LevelSelectController __instance)
         {
             _currentLevelSelectInstance = __instance;
+        }
+
+        [HarmonyPatch(typeof(TromboneEventManager), nameof(TromboneEventManager.Update))]
+        [HarmonyPostfix]
+        public static void TromboneEventManagerPostfix(TromboneEventManager __instance)
+        {
+            if (_replayManagerState == ReplayManagerState.Replaying || _replayManagerState == ReplayManagerState.Paused)
+            {
+                Traverse.Create(__instance).Field("mousePosition").SetValue(_replay._mousePos);
+                __instance.MousePositionUpdated.Invoke(new Vector3(_replay._mousePos.x / (float)_replay.ScreenWidth, _replay._mousePos.y / (float)_replay.ScreenHeight, 0f));
+            }
+        }
+
+        [HarmonyPatch(typeof(TromboneEventInvoker), nameof(TromboneEventInvoker.LateUpdate))]
+        [HarmonyPostfix]
+        public static void TromboneEventInvokerPostfix(TromboneEventInvoker __instance)
+        {
+            if (_replay._isTooting)
+            {
+                if (_currentInputState == false)
+                {
+                    _currentInputState = true;
+                    foreach (var manager in _eventManagers) manager.PlayerTootInputStart?.Invoke();
+                }
+            }
+            else
+            {
+                if (_currentInputState == true)
+                {
+                    _currentInputState = false;
+                    foreach (var manager in _eventManagers) manager.PlayerTootInputEnd?.Invoke();
+                }
+            }
         }
 
         #endregion
