@@ -58,7 +58,7 @@ namespace TootTallyLeaderboard.Replays
         private static GameObject _pauseArrow;
         private static Vector2 _pauseArrowDestination;
 
-        private static GameObject _bg;
+        private static GameObject _bgGameObject;
         private static TromboneEventManager[] _eventManagers;
         private static bool _currentInputState = false;
 
@@ -102,10 +102,10 @@ namespace TootTallyLeaderboard.Replays
 
             _pausePointerAnimation = new SecondDegreeDynamicsAnimation(2.5f, 1f, 0.85f);
 
-            _bg = __instance.bgcontroller.fullbgobject;
-            if (_bg) 
-                _replay._backgroundPuppetController = _bg.GetComponent<BackgroundPuppetController>();
-                _eventManagers = _bg.GetComponentsInChildren<TromboneEventManager>();
+            _bgGameObject = __instance.bgcontroller.fullbgobject;
+            if (_bgGameObject)
+                _replay._backgroundPuppetController = _bgGameObject.GetComponent<BackgroundPuppetController>();
+            _eventManagers = _bgGameObject.GetComponentsInChildren<TromboneEventManager>();
         }
 
         [HarmonyPatch(typeof(GameController), nameof(GameController.buildNotes))]
@@ -240,10 +240,10 @@ namespace TootTallyLeaderboard.Replays
                 GameObject prevHighLabel = GameObject.Find("Canvas/FullPanel/LeftLabels/PREV. HI SCORE");
                 Text[] prevHighLabelText = prevHighLabel.GetComponentsInChildren<Text>();
                 foreach (Text text in prevHighLabelText)
-                {
                     text.text = "Player"; // TODO: this should probably be localised at some point in the future
-                }
-            } else {
+            }
+            else
+            {
                 GameObject lowerRightPanel = __instance.yellowwave.transform.parent.gameObject;
 
                 GameObject UICanvas = lowerRightPanel.transform.parent.gameObject;
@@ -416,12 +416,12 @@ namespace TootTallyLeaderboard.Replays
         [HarmonyPostfix]
         static void PauseCanvasAddWarning(PauseCanvasController __instance)
         {
-            _toottallyPauseWarning = GameObject.Instantiate(__instance.control_hint_box, __instance.panelobj.transform.parent);            
+            _toottallyPauseWarning = GameObject.Instantiate(__instance.control_hint_box, __instance.panelobj.transform.parent);
             _toottallyPauseWarning.transform.localScale = new Vector3(0, 0, 1);
             var rect = _toottallyPauseWarning.GetComponent<RectTransform>();
             rect.anchoredPosition = Vector2.zero;
             rect.sizeDelta = new Vector2(210, 46);
-            rect.anchorMin = rect.anchorMax =  new Vector2(.5f, .18f);
+            rect.anchorMin = rect.anchorMax = new Vector2(.5f, .18f);
             rect.pivot = new Vector2(.5f, .5f);
             _toottallyPauseWarning.GetComponent<Image>().color = new Color(.1f, .1f, 0, .5f);
             var border = _toottallyPauseWarning.transform.GetChild(0).gameObject;
@@ -430,7 +430,7 @@ namespace TootTallyLeaderboard.Replays
             GameObjectFactory.DestroyFromParent(border, "Image (2)");
             GameObjectFactory.DestroyFromParent(border, "Image (3)");
             GameObjectFactory.DestroyFromParent(border, "txt-track-vol");
-            
+
             var text = border.transform.Find("txt-quick-restart").GetComponent<Text>();
             if (text.TryGetComponent(out LocalizeStringEvent locEvent))
                 GameObject.DestroyImmediate(locEvent);
