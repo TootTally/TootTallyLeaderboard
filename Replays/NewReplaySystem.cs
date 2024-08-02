@@ -226,7 +226,15 @@ namespace TootTallyLeaderboard.Replays
             _isTooting = false;
 
             if (_replayData.notedata.Count != 0 && __instance.currentnoteindex != 0)
+            {
                 __instance.currentscore = (int)_replayData.notedata.Find(note => (int)note[(int)NDStruct.I] == __instance.currentnoteindex - 1)[(int)NDStruct.S];
+                var allNoteTally = _replayData.notedata.Where(note => (int)note[(int)NDStruct.I] <= __instance.currentnoteindex - 1).Select(note => note[(int)NDStruct.TL]);
+                __instance.scores_A = allNoteTally.Count(tally => tally == 4);
+                __instance.scores_B = allNoteTally.Count(tally => tally == 3);
+                __instance.scores_C = allNoteTally.Count(tally => tally == 2);
+                __instance.scores_D = allNoteTally.Count(tally => tally == 1);
+                __instance.scores_F = allNoteTally.Count(tally => tally == 0);
+            }
         }
 
         public ReplayState LoadReplay(string replayFileName)
