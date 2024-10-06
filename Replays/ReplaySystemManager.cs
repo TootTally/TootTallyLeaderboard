@@ -230,7 +230,7 @@ namespace TootTallyLeaderboard.Replays
             }
 
             string modifiers = GameModifierManager.GetModifiersString();
-            if (!modifiers.ToLower().Contains("none"))
+            if (!string.IsNullOrEmpty(modifiers) && !modifiers.ToLower().Contains("none"))
                 __instance.txt_trackname.text += $" [{modifiers}]";
 
             if (wasPlayingReplay)
