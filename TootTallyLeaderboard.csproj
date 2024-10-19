@@ -4,7 +4,7 @@
 		<TargetFramework>net48</TargetFramework>
 		<AssemblyName>TootTallyLeaderboard</AssemblyName>
 		<Description>TootTally Leaderboard and Replay module</Description>
-		<Version>1.1.3</Version>
+		<Version>1.1.4</Version>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<LangVersion>latest</LangVersion>
 		<TromboneChampDir>E:\SteamLibrary\steamapps\common\TromboneChamp</TromboneChampDir>
@@ -24,6 +24,7 @@
 		<PackageReference Include="TromboneChamp.GameLibs" Version="1.20.0-beta" />
 		<PackageReference Include="TromboneChamp.BaboonAPI" Version="2.7.1" />
 		<PackageReference Include="TromboneChamp.TrombLoader" Version="2.0.0-rc.1" />
+		<Assets Include="Assets\*.*" />
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(TargetFramework.TrimEnd(`0123456789`))' == 'net'">
@@ -50,5 +51,17 @@
 
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
 		<Copy SourceFiles="$(TargetPath)" DestinationFolder="$(TromboneTootDir)\BepInEx\plugins\TootTally-TootTallyLeaderboard" />
+		<Copy SourceFiles="@(Assets)" DestinationFolder="$(TromboneTootDir)\BepInEx\plugins\TootTally-TootTallyLeaderboard\Assets" />
+	</Target>
+	<Target Name="ThunderstoreZip" AfterTargets="Build">
+		<Delete Files="$(OutDir)thunderstore" />
+		<Delete Files="$(SolutionDir)$(ProjectName).zip" />
+		<Copy SourceFiles="CHANGELOG.md" DestinationFolder="$(OutDir)thunderstore" />
+		<Copy SourceFiles="icon.png" DestinationFolder="$(OutDir)thunderstore" />
+		<Copy SourceFiles="manifest.json" DestinationFolder="$(OutDir)thunderstore" />
+		<Copy SourceFiles="README.md" DestinationFolder="$(OutDir)thunderstore" />
+		<Copy SourceFiles="$(TargetPath)" DestinationFolder="$(OutDir)thunderstore/plugins" />
+		<Copy SourceFiles="@(Assets)" DestinationFolder="$(OutDir)thunderstore/plugins/Assets" />
+		<ZipDirectory DestinationFile="$(SolutionDir)$(ProjectName).zip" SourceDirectory="$(OutDir)thunderstore" />
 	</Target>
 </Project>

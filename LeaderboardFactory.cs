@@ -268,7 +268,7 @@ namespace TootTallyLeaderboard
             rowEntry.username.text = scoreData.player;
             rowEntry.score.text = string.Format("{0:n0}", scoreData.score) + $" ({scoreData.replay_speed:0.00}x)";
             var bubble = GameObjectFactory.CreateBubble(new Vector2(175, 200), $"{rowEntry.name}ScoreBubble", GetTallyBubbleText(scoreData.GetTally), 10, false);
-            if (scoreData.modifiers != null && !scoreData.modifiers.Contains("NONE"))
+            if (scoreData.modifiers != null && scoreData.modifiers.Length > 0 && !scoreData.modifiers.Contains("NONE"))
             {
                 rowEntry.score.text += "*";
                 var hObj = new GameObject("HorizontalLayout", typeof(HorizontalLayoutGroup));
