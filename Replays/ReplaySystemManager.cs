@@ -666,12 +666,15 @@ namespace TootTallyLeaderboard.Replays
             {
                 Plugin.LogInfo("Replay UUID was null, skipping replay submission.");
                 TootTallyNotifManager.DisplayNotif("Replay UUID was null, skipping replay submission.");
-                return false; //Dont save or upload if no UUID
+                return false;
             }
-            if (GameModifierManager.GetModifiersString().Contains("BT"))
+
+            var modifiers = GameModifierManager.GetModifiersString();
+            if (!GameModifierManager.GetShouldSubmitScore || modifiers.Contains("EZ") || modifiers.Contains("HR") || modifiers.Contains("BT") || modifiers.Contains("AT"))
             {
-                Plugin.LogInfo("BT modifier was used, skipping replay submission.");
-                return false; //Dont save or upload if no UUID
+                Plugin.LogInfo("Unrated modifier was used, skipping replay submission.");
+                TootTallyNotifManager.DisplayNotif("Unrated modifier was used, skipping replay submission.");
+                return false;
             }
 
             if (TootTallyGlobalVariables.isSpectating)
