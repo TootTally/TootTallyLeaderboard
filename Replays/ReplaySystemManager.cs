@@ -670,7 +670,7 @@ namespace TootTallyLeaderboard.Replays
             }
 
             var modifiers = GameModifierManager.GetModifiersString();
-            if (!GameModifierManager.GetShouldSubmitScore || modifiers.Contains("EZ") || modifiers.Contains("HR") || modifiers.Contains("BT") || modifiers.Contains("AT"))
+            if (!GameModifierManager.GetShouldSubmitScore)
             {
                 Plugin.LogInfo("Unrated modifier was used, skipping replay submission.");
                 TootTallyNotifManager.DisplayNotif("Unrated modifier was used, skipping replay submission.");
