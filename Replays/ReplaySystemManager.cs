@@ -248,6 +248,15 @@ namespace TootTallyLeaderboard.Replays
 
                 GameObject UICanvas = lowerRightPanel.transform.parent.gameObject;
 
+                GameObjectFactory.CreateCustomButton(UICanvas.transform, new Vector2(-225, -225), new Vector2(64, 20), "Replay", "WatchReplayButton", delegate
+                {
+                    _replayFileName = "TempReplay";
+                    _replay.SetUsernameAndSongName(TootTallyUser.userInfo.username, GlobalVariables.chosen_track_data.trackname_long);
+                    Plugin.LogInfo("TempReplay Loaded");
+                    __instance.clickRetry();
+                })
+                .textHolder.fontSize = 14;
+
                 GameObject ttHitbox = LeaderboardFactory.CreateDefaultPanel(UICanvas.transform, new Vector2(365, -23), new Vector2(56, 112), "ScorePanelHitbox");
                 GameObjectFactory.CreateSingleText(ttHitbox.transform, "ScorePanelHitboxText", "<", GameObjectFactory.TextFont.Multicolore);
 
@@ -503,6 +512,7 @@ namespace TootTallyLeaderboard.Replays
         public static void OnLevelselectControllerStartInstantiateReplay(LevelSelectController __instance)
         {
             _currentLevelSelectInstance = __instance;
+            _replayFileName = "";
         }
 
         [HarmonyPatch(typeof(TromboneEventManager), nameof(TromboneEventManager.Update))]
