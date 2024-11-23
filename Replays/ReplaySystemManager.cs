@@ -512,7 +512,7 @@ namespace TootTallyLeaderboard.Replays
         public static void OnLevelselectControllerStartInstantiateReplay(LevelSelectController __instance)
         {
             _currentLevelSelectInstance = __instance;
-            _replayFileName = "";
+            _replayFileName = null;
         }
 
         [HarmonyPatch(typeof(TromboneEventManager), nameof(TromboneEventManager.Update))]
