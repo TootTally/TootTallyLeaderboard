@@ -77,9 +77,9 @@ namespace TootTallyLeaderboard
             {
                 if (tabindex == 0)
                     if (TootTallyAccounts.TootTallyUser.userInfo.id != 0)
-                        globalLeaderboard.OpenUserProfile();
+                        GlobalLeaderboard.OpenUserProfile(TootTallyAccounts.TootTallyUser.userInfo.id);
                     else
-                        globalLeaderboard.OpenLoginPage();
+                        GlobalLeaderboard.OpenLoginPage();
                 else if (tabindex == 1)
                     globalLeaderboard.OpenSongLeaderboard();
                 else if (tabindex == 2)

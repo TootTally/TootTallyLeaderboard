@@ -257,7 +257,7 @@ namespace TootTallyLeaderboard
                     {
                         AssetManager.GetProfilePictureByID(user.id, sprite =>
                         {
-                            var i = GameObjectFactory.CreateCustomButton(scoresbody.transform, Vector2.zero, new Vector2(sprite.rect.width, sprite.rect.height), sprite, false, "Pfp", OpenUserProfile);
+                            var i = GameObjectFactory.CreateCustomButton(scoresbody.transform, Vector2.zero, new Vector2(sprite.rect.width, sprite.rect.height), sprite, false, "Pfp", delegate { OpenUserProfile(TootTallyUser.userInfo.id); });
                             i.transform.SetSiblingIndex(0);
                         });
 
@@ -416,7 +416,7 @@ namespace TootTallyLeaderboard
             _localScoreId = -1;
             foreach (SerializableClass.ScoreDataFromDB scoreData in _scoreDataList)
             {
-                LeaderboardRowEntry rowEntry = LeaderboardFactory.CreateLeaderboardRowEntryFromScore(_scoreboard.transform, $"RowEntry{scoreData.player}", scoreData, count, gradeToColorDict[scoreData.grade], _levelSelectControllerInstance);
+                LeaderboardRowEntry rowEntry = LeaderboardFactory.CreateLeaderboardRowEntryFromScore(_scoreboard.transform, $"RowEntry{scoreData.player}", scoreData, count, gradeToColorDict[scoreData.grade], _levelSelectControllerInstance) ;
                 _scoreGameObjectList.Add(rowEntry);
                 if (scoreData.player == TootTallyUser.userInfo.username)
                 {
@@ -479,8 +479,8 @@ namespace TootTallyLeaderboard
         public void ShowSlider() => _slider.gameObject.SetActive(true); public void HideSlider() => _slider.gameObject.SetActive(false);
         public void ShowErrorText() => _errorsHolder.SetActive(true); public void HideErrorText() => _errorsHolder.SetActive(false);
 
-        public void OpenUserProfile() => Application.OpenURL("https://toottally.com/profile/" + TootTallyAccounts.TootTallyUser.userInfo.id);
-        public void OpenLoginPage() => Application.OpenURL("https://toottally.com/login");
+        public static void OpenUserProfile(int id) => Application.OpenURL($"https://toottally.com/profile/{id}");
+        public static void OpenLoginPage() => Application.OpenURL("https://toottally.com/login");
         public void OpenSongLeaderboard() => Application.OpenURL("https://toottally.com/song/" + _currentSelectedSongHash);
         public void OpenSongFolder()
         {

@@ -8,6 +8,7 @@ using HarmonyLib;
 using TootTallyCore;
 using TootTallyCore.Utils.Assets;
 using System.Linq;
+using UnityEngine.EventSystems;
 
 namespace TootTallyLeaderboard
 {
@@ -266,6 +267,12 @@ namespace TootTallyLeaderboard
             LeaderboardRowEntry rowEntry = GameObject.Instantiate(_singleRowPrefab, canvasTransform);
             rowEntry.name = name;
             rowEntry.username.text = scoreData.player;
+            var eventTrigger = rowEntry.username.gameObject.AddComponent<EventTrigger>(); //Open user profile when clicking their name
+            EventTrigger.Entry pointerClickEvent = new EventTrigger.Entry();
+            pointerClickEvent.eventID = EventTriggerType.PointerClick;
+            pointerClickEvent.callback.AddListener(data => { GlobalLeaderboard.OpenUserProfile(scoreData.player_id); });
+            eventTrigger.triggers.Add(pointerClickEvent);
+
             rowEntry.score.text = string.Format("{0:n0}", scoreData.score) + $" ({scoreData.replay_speed:0.00}x)";
             var bubble = GameObjectFactory.CreateBubble(new Vector2(175, 200), $"{rowEntry.name}ScoreBubble", GetTallyBubbleText(scoreData.GetTally), 10, false);
             if (scoreData.modifiers != null && scoreData.modifiers.Length > 0 && !scoreData.modifiers.Contains("NONE"))
@@ -304,7 +311,7 @@ namespace TootTallyLeaderboard
             {
 
                 rowEntry.maxcombo.text = Mathf.RoundToInt(scoreData.tt) + "tt";
-                rowEntry.maxcombo.gameObject.AddComponent<BubblePopupHandler>().Initialize(GameObjectFactory.CreateBubble(new Vector2(150, 75), $"{rowEntry.name}ComboBubble", $"{scoreData.max_combo} combo", 10, true));
+                rowEntry.maxcombo.gameObject.AddComponent<BubblePopupHandler>().Initialize(GameObjectFactory.CreateBubble(new Vector2(225, 75), $"{rowEntry.name}ComboBubble", $"{scoreData.max_combo} combo, {scoreData.tt:0.00}tt", 10, true));
             }
             else
                 rowEntry.maxcombo.text = scoreData.max_combo + "x";
