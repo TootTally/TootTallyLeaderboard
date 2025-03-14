@@ -1,5 +1,25 @@
 #### Changelog:
 
+`v1.1.8` -> `v1.1.9`
+
+```diff
++ Update for TC 1.25
++ Fixed star rating being halved on unrated songs
+```
+
+`v1.1.6` -> `v1.1.8`
+
+```diff
++ Added replay button to pointScene
++ Other bug fixes
+```
+
+`v1.1.4` -> `v1.1.6`
+
+```diff
++ Fix for new game modifiers
+```
+
 `v1.1.3` -> `v1.1.4`
 
 ```diff
