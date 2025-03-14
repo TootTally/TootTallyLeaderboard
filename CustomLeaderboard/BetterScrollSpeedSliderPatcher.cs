@@ -21,9 +21,9 @@ namespace TootTallyLeaderboard
         {
             SetSliderOption();
 
-            Text yoinkText = GameObject.Find("MainCanvas/FullScreenPanel/ScrollSpeed-lbl").GetComponent<Text>();
+            Text yoinkText = GameObject.Find("MainCanvas/FullScreenPanel/scroll_speed/ScrollSpeed-lbl").GetComponent<Text>();
 
-            Slider slider = GameObject.Find("MainCanvas/FullScreenPanel/Slider").GetComponent<Slider>();
+            Slider slider = GameObject.Find("MainCanvas/FullScreenPanel/scroll_speed/Slider").GetComponent<Slider>();
             slider.navigation = new Navigation() { mode = Navigation.Mode.None };
             slider.fillRect.gameObject.GetComponent<Image>().color = Theme.colors.scrollSpeedSlider.fill;
             slider.transform.Find("Background").GetComponent<Image>().color = Theme.colors.scrollSpeedSlider.background;
@@ -42,7 +42,7 @@ namespace TootTallyLeaderboard
             scrollSpeedSliderText.text = SliderValueToText(slider.value);
             slider.onValueChanged.AddListener((float _value) => { options.LastValue.Value = _value * 100f; scrollSpeedSliderText.text = SliderValueToText(_value); });
 
-            GameObject.Find("MainCanvas/FullScreenPanel/ScrollSpeed-lbl").gameObject.SetActive(false);
+            GameObject.Find("MainCanvas/FullScreenPanel/scroll_speed/ScrollSpeed-lbl").gameObject.SetActive(false);
 
         }
 

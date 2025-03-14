@@ -30,7 +30,7 @@ namespace TootTallyLeaderboard
         private const string ERROR_NO_SONGHASH_FOUND_TEXT = "This chart is not uploaded to TootTally...\n <size=15>Please upload the chart to TootTally.com\n or use TootBender on discord to create the leaderboard.</size>";
         private static Dictionary<string, Color> gradeToColorDict = new Dictionary<string, Color> { { "SSS", Color.yellow }, { "SS", Color.yellow }, { "S", Color.yellow }, { "A", Color.green }, { "B", new Color(0, .4f, 1f) }, { "C", Color.magenta }, { "D", Color.red }, { "F", Color.grey }, };
         private static string[] tabsImageNames = { "profile64.png", "global64.png", "local64.png" };
-        private static float[] _starSizeDeltaPositions = { 0, 20, 58, 96, 134, 172, 210, 248, 285, 324, 361 };
+        private static float[] _starSizeDeltaPositions = { 0, 19, 39, 59, 79, 99, 119, 139, 159, 179, 199 };
         private static GameObject _fullScreenPanelCanvas;
         #endregion
 
@@ -125,8 +125,9 @@ namespace TootTallyLeaderboard
 
             GameObject diffStarsHolder = _fullScreenPanelCanvas.transform.Find("difficulty stars").gameObject;
             _diffRatingMaskRectangle = diffStarsHolder.GetComponent<RectTransform>();
-            _diffRatingMaskRectangle.anchoredPosition = new Vector2(-284, -48);
+            _diffRatingMaskRectangle.anchoredPosition = new Vector2(105, -48);
             _diffRatingMaskRectangle.sizeDelta = new Vector2(0, 30);
+            _diffRatingMaskRectangle.pivot = new Vector2(0, .5f);
             var mask = diffStarsHolder.AddComponent<Mask>();
             mask.showMaskGraphic = false;
             diffStarsHolder.AddComponent<Image>();
@@ -191,20 +192,21 @@ namespace TootTallyLeaderboard
 
                 //Patch current slider and move it slightly above RANDOM_btn
                 BetterScrollSpeedSliderPatcher.PatchScrollSpeedSlider();
-                _fullScreenPanelCanvas.transform.Find("Slider").GetComponent<RectTransform>().anchoredPosition = new Vector2(-115, 23);
-                _fullScreenPanelCanvas.transform.Find("txt_scrollspeed").GetComponent<RectTransform>().anchoredPosition = new Vector2(-112, 36);
+                _fullScreenPanelCanvas.transform.Find("scroll_speed").GetComponent<RectTransform>().anchoredPosition = new Vector2(4.5f, 5f);
+                _fullScreenPanelCanvas.transform.Find("scroll_speed/Slider").GetComponent<RectTransform>().anchoredPosition = new Vector2(-115f, 22f);
+                _fullScreenPanelCanvas.transform.Find("scroll_speed/txt_scrollspeed").GetComponent<RectTransform>().anchoredPosition = new Vector2(-112, 36);
 
                 //Remove btn_TURBO + btn_PRACTICE and add GameSpeed slider
                 _fullScreenPanelCanvas.transform.Find("btn_TURBO").gameObject.SetActive(false);
                 _fullScreenPanelCanvas.transform.Find("btn_PRACTICE").gameObject.SetActive(false);
-                _gameSpeedSlider = GameObject.Instantiate(_fullScreenPanelCanvas.transform.Find("Slider").GetComponent<Slider>(), _fullScreenPanelCanvas.transform);
+                _gameSpeedSlider = GameObject.Instantiate(_fullScreenPanelCanvas.transform.Find("scroll_speed/Slider").GetComponent<Slider>(), _fullScreenPanelCanvas.transform);
                 _gameSpeedSlider.gameObject.GetComponent<RectTransform>().anchoredPosition = new Vector2(-110, 65);
                 _gameSpeedSlider.wholeNumbers = true;
                 _gameSpeedSlider.minValue = 0;
                 _gameSpeedSlider.maxValue = 30;
                 _gameSpeedSlider.value = (Replays.ReplaySystemManager.gameSpeedMultiplier - .5f) / .05f;
 
-                GameObject gameSpeedText = GameObject.Instantiate(_fullScreenPanelCanvas.transform.Find("txt_scrollspeed").gameObject, _fullScreenPanelCanvas.transform);
+                GameObject gameSpeedText = GameObject.Instantiate(_fullScreenPanelCanvas.transform.Find("scroll_speed/txt_scrollspeed").gameObject, _fullScreenPanelCanvas.transform);
                 gameSpeedText.name = "GameSpeedShad";
                 gameSpeedText.GetComponent<Text>().text = "Game Speed";
                 gameSpeedText.GetComponent<RectTransform>().anchoredPosition = new Vector2(-108, 78);
@@ -296,7 +298,8 @@ namespace TootTallyLeaderboard
 
                 if (Plugin.Instance.option.ShowLeaderboard.Value)
                 {
-                    __instance.diffstars[i].gameObject.GetComponent<RectTransform>().anchoredPosition = new Vector2(i * 19, 0);
+                    var rect = __instance.diffstars[i].gameObject.GetComponent<RectTransform>();
+                    rect.anchorMin = rect.anchorMax = new Vector2(0, .5f);
                     __instance.diffstars[i].maskable = true;
                 }
             }
@@ -304,7 +307,7 @@ namespace TootTallyLeaderboard
             float diff;
             if (_songData != null)
             {
-                diff = _songData.is_rated ? _speedToDiffDict[(int)_gameSpeedSlider.value] : _speedToDiffDict[1];
+                diff = _speedToDiffDict[(int)_gameSpeedSlider.value];
                 _diffRating.text = diff.ToString("0.0");
             }
             else
