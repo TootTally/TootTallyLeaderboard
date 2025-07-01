@@ -55,9 +55,9 @@ namespace TootTallyLeaderboard
             _singleRowPrefab.UpdateTheme();
 
             _leaderboardTextPrefab.color = colors.text;
-            _leaderboardTextPrefab.outlineColor = colors.textOutline;
+            _leaderboardTextPrefab.fontMaterial.SetColor(ShaderUtilities.ID_OutlineColor, colors.textOutline);
             _leaderboardHeaderPrefab.color = colors.headerText;
-            _leaderboardHeaderPrefab.outlineColor = colors.textOutline;
+            _leaderboardHeaderPrefab.fontMaterial.SetColor(ShaderUtilities.ID_OutlineColor, colors.textOutline);
         }
 
         private static void SetSteamLeaderboardPrefab()
