@@ -4,7 +4,7 @@
 		<TargetFramework>net48</TargetFramework>
 		<AssemblyName>TootTallyLeaderboard</AssemblyName>
 		<Description>TootTally Leaderboard and Replay module</Description>
-		<Version>1.1.10</Version>
+		<Version>1.1.9</Version>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<LangVersion>latest</LangVersion>
 		<TromboneChampDir>E:\SteamLibrary\steamapps\common\TromboneChamp</TromboneChampDir>
@@ -21,8 +21,8 @@
 		<PackageReference Include="BepInEx.PluginInfoProps" Version="1.*" />
 		<PackageReference Include="UnityEngine.Modules" Version="2019.4.40" IncludeAssets="compile" />
 		<PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-		<PackageReference Include="TromboneChamp.GameLibs" Version="1.20.0-beta" />
-		<PackageReference Include="TromboneChamp.BaboonAPI" Version="2.7.1" />
+		<PackageReference Include="TromboneChamp.GameLibs" Version="1.25.0" />
+		<PackageReference Include="TromboneChamp.BaboonAPI" Version="2.9.0" />
 		<PackageReference Include="TromboneChamp.TrombLoader" Version="2.0.0-rc.1" />
 		<Assets Include="Assets\*.*" />
 	</ItemGroup>
