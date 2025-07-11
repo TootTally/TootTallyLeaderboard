@@ -16,13 +16,14 @@ using TootTallyGameModifiers;
 using TrombLoader.CustomTracks;
 using TrombLoader.Data;
 using UnityEngine;
+using UnityEngine.Experimental.AI;
 
 namespace TootTallyLeaderboard.Replays
 {
     public class NewReplaySystem
     {
         public static List<string> incompatibleReplayVersions = new List<string> { "1.0.0" };
-        public const string REPLAY_VERSION = "2.1.0";
+        public const string REPLAY_VERSION = "2.1.1";
 
         private int _frameIndex, _tootIndex;
 
@@ -54,7 +55,7 @@ namespace TootTallyLeaderboard.Replays
 
         public NewReplaySystem()
         {
-            _replayData = new ReplayData(60);
+            _replayData = new ReplayData(120);
         }
 
         #region ReplayRecorder
@@ -127,6 +128,7 @@ namespace TootTallyLeaderboard.Replays
                 _lastFrame = frame;
             }
 
+
         }
 
         private const float FLOAT_PRECISION = 1000f;
@@ -160,11 +162,21 @@ namespace TootTallyLeaderboard.Replays
 
         public void RecordToot(float time, float noteHolderPosition, bool isTooting)
         {
-            dynamic[] toot = new dynamic[3]
+            var keyPresses = new List<int>();
+            for (int i = 0; i < GlobalVariables.keyboard_key_keycodes.Length; i++)
+                if (Input.GetKey(GlobalVariables.keyboard_key_keycodes[i]))
+                    keyPresses.Add(GlobalVariables.keyboard_key_keycodes[i].GetHashCode());
+            if (Input.GetMouseButton(0))
+                keyPresses.Add(-1);
+            if (Input.GetMouseButton(1))
+                keyPresses.Add(-2);
+
+            dynamic[] toot = new dynamic[4]
             {
                 Round(time, 10f),
                 Round(noteHolderPosition, 10f),
-                isTooting ? 1 : 0
+                isTooting ? 1 : 0,
+                keyPresses
             };
             _replayData.tootdata.Add(toot);
         }
