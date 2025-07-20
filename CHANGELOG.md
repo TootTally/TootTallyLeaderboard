@@ -1,5 +1,12 @@
 #### Changelog:
 
+`v1.2.0` -> `v1.2.1`
+
+```diff
++ Updated replays so they run at 120fps.
++ Slight optimization to replays recording
+```
+
 `v1.1.9` -> `v1.2.0`
 
 ```diff
