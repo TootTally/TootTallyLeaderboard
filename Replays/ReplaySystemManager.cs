@@ -699,6 +699,12 @@ namespace TootTallyLeaderboard.Replays
                 return false;
             }
 
+            if (TootTallyGlobalVariables.isTournamentHosting)
+            {
+                Plugin.LogInfo("Tournament mode enabled, skipping replay submission.");
+                return false;
+            }
+
             if (!TootTallyGlobalVariables.allowSubmit)
             {
                 TootTallyNotifManager.DisplayWarning("TTCore preventing score submit, skipping replay submission.");
