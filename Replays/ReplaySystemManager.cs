@@ -633,9 +633,7 @@ namespace TootTallyLeaderboard.Replays
             {
                 SaveReplayToFile();
                 if (ShouldSubmitReplay())
-                {
                     SendReplayFileToServer();
-                }
             }
 
 
@@ -757,6 +755,7 @@ namespace TootTallyLeaderboard.Replays
             {
                 TootTallyNotifManager.DisplayWarning("Not logged in, skipping replay submission.");
                 Plugin.LogInfo("Not logged in, skipping replay submission.");
+                return false;
             }
 
             if (!TootTallyUser.userInfo.allowSubmit)
