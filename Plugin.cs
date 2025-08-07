@@ -77,7 +77,8 @@ namespace TootTallyLeaderboard
             AssetManager.LoadAssets(Path.Combine(Path.GetDirectoryName(Instance.Info.Location), "Assets"));
 
             ShouldUpdateSession = DateTime.Parse(Instance.option.SessionDate.Value).Date.CompareTo(DateTime.Now.Date) < 0;
-
+            //Will make this async before making it active
+            //CachedReplays.LoadCachedReplays();
             _harmony.PatchAll(typeof(LeaderboardFactory));
             _harmony.PatchAll(typeof(ReplaySystemManager));
             _harmony.PatchAll(typeof(GlobalLeaderboardManager));

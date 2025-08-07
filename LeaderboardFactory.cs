@@ -9,6 +9,8 @@ using TootTallyCore;
 using TootTallyCore.Utils.Assets;
 using System.Linq;
 using UnityEngine.EventSystems;
+using TootTallyCore.Utils.Helpers;
+using Newtonsoft.Json;
 
 namespace TootTallyLeaderboard
 {

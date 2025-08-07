@@ -227,7 +227,7 @@ namespace TootTallyLeaderboard.Replays
             _isLastNote = false;
             _currentFrame = _replayData.framedata.Count > 0 ? _replayData.framedata.First() : null;
             _currentNote = _replayData.notedata.Count > 0 ? _replayData.notedata.First() : null;
-            _currentToot = new dynamic[] { 0, 0, 0 };
+            _currentToot = new dynamic[] { 0, 0, 0, new List<int>()};
         }
 
         public void OnReplayRewind(float newTiming, GameController __instance)
@@ -485,7 +485,7 @@ namespace TootTallyLeaderboard.Replays
         }
 
         [Serializable]
-        private class ReplayData
+        public class ReplayData
         {
             public string version { get; set; }
             public string username { get; set; }

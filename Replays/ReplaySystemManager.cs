@@ -629,14 +629,56 @@ namespace TootTallyLeaderboard.Replays
         {
             _replayManagerState = ReplayManagerState.None;
 
-            if (ShouldSubmitReplay())
+            if (IsReplayValid())
             {
                 SaveReplayToFile();
-                if (TootTallyUser.userInfo.username != "Guest" && Plugin.Instance.option.SubmitScores.Value) //Don't upload if logged in as a Guest
+                if (ShouldSubmitReplay())
+                {
                     SendReplayFileToServer();
+                }
             }
 
 
+
+
+        }
+
+        public static bool IsReplayValid()
+        {
+            if (AutoTootCompatibility.enabled && AutoTootCompatibility.WasAutoUsed)
+            {
+                Plugin.LogInfo("AutoToot used, not saving replay.");
+                return false; // Don't save anything if AutoToot was used.
+            }
+            if (_hasPaused)
+            {
+                Plugin.LogInfo("Paused during gameplay, not saving replay.");
+                return false; //Don't save if paused during the play
+            }
+
+            if (_replayUUID == null)
+            {
+                Plugin.LogInfo("Replay UUID was null, not saving replay.");
+                return false;
+            }
+            if (TootTallyGlobalVariables.isSpectating)
+            {
+                Plugin.LogInfo("Spectating someone, not saving replay.");
+                return false;
+            }
+
+            if (TootTallyGlobalVariables.isPracticing)
+            {
+                Plugin.LogInfo("Practice mode enabled, not saving replay.");
+                return false;
+            }
+
+            if (TootTallyGlobalVariables.isTournamentHosting)
+            {
+                Plugin.LogInfo("Tournament mode enabled, not saving replay.");
+                return false;
+            }
+            return true;
         }
 
         public static bool ShouldSubmitReplay()
@@ -679,7 +721,6 @@ namespace TootTallyLeaderboard.Replays
                 return false;
             }
 
-            var modifiers = GameModifierManager.GetModifiersString();
             if (!GameModifierManager.GetShouldSubmitScore)
             {
                 Plugin.LogInfo("Unrated modifier was used, skipping replay submission.");
@@ -710,6 +751,12 @@ namespace TootTallyLeaderboard.Replays
                 TootTallyNotifManager.DisplayWarning("TTCore preventing score submit, skipping replay submission.");
                 Plugin.LogInfo("TTCore preventing score submit, allowSubmit is false, skipping replay submission.");
                 return false;
+            }
+
+            if (TootTallyUser.userInfo.username != "Guest")
+            {
+                TootTallyNotifManager.DisplayWarning("Not logged in, skipping replay submission.");
+                Plugin.LogInfo("Not logged in, skipping replay submission.");
             }
 
             if (!TootTallyUser.userInfo.allowSubmit)
