@@ -1,5 +1,12 @@
 #### Changelog:
 
+`v1.2.1` -> `v1.2.2`
+
+```diff
++ Compatibility update for 1.27E
++ Preparation for Cached Local Replays. Currently inactive for will be actived in an upcoming update.
+```
+
 `v1.2.0` -> `v1.2.1`
 
 ```diff

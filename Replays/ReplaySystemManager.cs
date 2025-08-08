@@ -751,7 +751,7 @@ namespace TootTallyLeaderboard.Replays
                 return false;
             }
 
-            if (TootTallyUser.userInfo.username != "Guest")
+            if (TootTallyUser.userInfo.username == "Guest")
             {
                 TootTallyNotifManager.DisplayWarning("Not logged in, skipping replay submission.");
                 Plugin.LogInfo("Not logged in, skipping replay submission.");

@@ -1,13 +1,13 @@
 {
     "name": "TootTallyLeaderboard",
-    "version_number": "1.2.1",
+    "version_number": "1.2.2",
     "website_url": "https://github.com/TootTally/TootTallyLeaderboard",
     "description": "TootTally Global Leaderboards and Replay System",
     "dependencies": [
         "TootTally-TootTallyAccounts-1.0.3",
         "TootTally-TootTallyGameModifiers-1.2.5",
         "TootTally-TootTallyDiffCalcLibs-1.0.6",
-        "TootTally-TootTallyCore-1.3.2",
+        "TootTally-TootTallyCore-1.3.4",
         "TromboneChamps-TrombLoader-2.3.0",
         "TromboneChamps-BaboonAPI-2.9.0",
         "BepInEx-BepInExPack_TromboneChamp-5.4.21"

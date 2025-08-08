@@ -253,6 +253,7 @@ namespace TootTallyLeaderboard
                     horizontalLayoutGroup.childForceExpandHeight = horizontalLayoutGroup.childForceExpandWidth = true;
 
                     GameObject mainPanel = GameObject.Instantiate(titlebarPrefab, scoresbody.transform);
+                    mainPanel.GetComponent<Image>().enabled = false;
                     VerticalLayoutGroup verticalLayoutGroup = mainPanel.AddComponent<VerticalLayoutGroup>();
                     verticalLayoutGroup.padding = new RectOffset(2, 2, 2, 2);
                     verticalLayoutGroup.childAlignment = TextAnchor.MiddleCenter;
