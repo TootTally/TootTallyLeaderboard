@@ -1,5 +1,12 @@
 #### Changelog:
 
+`v1.2.2` -> `v1.2.3`
+
+```diff
++ Added new AutoToot compatibility
++ Added option to locally save AutoToot replays
+```
+
 `v1.2.1` -> `v1.2.2`
 
 ```diff

@@ -635,15 +635,11 @@ namespace TootTallyLeaderboard.Replays
                 if (ShouldSubmitReplay())
                     SendReplayFileToServer();
             }
-
-
-
-
         }
 
         public static bool IsReplayValid()
         {
-            if (AutoTootCompatibility.enabled && AutoTootCompatibility.WasAutoUsed)
+            if (((AutoTootCompatibility.enabled && AutoTootCompatibility.WasAutoUsed) || TootTallyGlobalVariables.usedAutotoot) && !Plugin.Instance.option.SaveAutoTootedReplays.Value)
             {
                 Plugin.LogInfo("AutoToot used, not saving replay.");
                 return false; // Don't save anything if AutoToot was used.
@@ -687,7 +683,7 @@ namespace TootTallyLeaderboard.Replays
                 Plugin.LogInfo("Submit scores turned off, skipping replay submission.");
                 return false;
             }
-            if (AutoTootCompatibility.enabled && AutoTootCompatibility.WasAutoUsed)
+            if ((AutoTootCompatibility.enabled && AutoTootCompatibility.WasAutoUsed) || TootTallyGlobalVariables.usedAutotoot)
             {
                 Plugin.LogInfo("AutoToot used, skipping replay submission.");
                 TootTallyNotifManager.DisplayWarning("AutoToot used, skipping replay submission.");

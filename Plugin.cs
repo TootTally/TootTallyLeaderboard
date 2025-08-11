@@ -63,6 +63,7 @@ namespace TootTallyLeaderboard
             option = new Options()
             {
                 ShowLeaderboard = Config.Bind("General", "Show Leaderboard", true, "Show TootTally Leaderboard on Song Select."),
+                SaveAutoTootedReplays = Config.Bind("General", "Save AutoToot replays", false, "Locally save auto tooted replays. Replays still won't submit to server."),
                 ShowCoolS = Config.Bind("General", "Show Cool S", false, "Show special graphic when getting SS and SSS on a song."),
                 SubmitScores = Config.Bind("General", "Suibmit Scores", true, "Submit your scores to the Toottally leaderboard."),
                 SessionDate = Config.Bind("General", "Session Date", DateTime.Now.ToString(), "The last time that the session started recording."),
@@ -71,6 +72,7 @@ namespace TootTallyLeaderboard
             };
 
             TootTallySettings.Plugin.MainTootTallySettingPage.AddToggle("Show Leaderboard", option.ShowLeaderboard);
+            TootTallySettings.Plugin.MainTootTallySettingPage.AddToggle("Save AutoToot Replays", option.SaveAutoTootedReplays);
             TootTallySettings.Plugin.MainTootTallySettingPage.AddToggle("Show Cool S", option.ShowCoolS);
             TootTallySettings.Plugin.MainTootTallySettingPage.AddToggle("Submit Scores", option.SubmitScores);
             TootTallySettings.Plugin.MainTootTallySettingPage.AddToggle("Replay Showcase Mode", option.ShowcaseMode);
@@ -95,6 +97,7 @@ namespace TootTallyLeaderboard
         public class Options
         {
             public ConfigEntry<bool> ShowLeaderboard { get; set; }
+            public ConfigEntry<bool> SaveAutoTootedReplays { get; set; }
             public ConfigEntry<bool> ShowCoolS { get; set; }
             public ConfigEntry<bool> SubmitScores { get; set; }
             public ConfigEntry<string> SessionDate { get; set; }
