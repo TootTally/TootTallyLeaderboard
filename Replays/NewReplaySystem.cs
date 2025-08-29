@@ -232,6 +232,8 @@ namespace TootTallyLeaderboard.Replays
 
         public void OnReplayRewind(float newTiming, GameController __instance)
         {
+            if (_replayData == null) return;
+
             if (_replayData.framedata.Count != 0)
             {
                 _frameIndex = Mathf.Clamp(_replayData.framedata.FindIndex(frame => (float)frame[(int)FDStruct.T] > newTiming) - 1, 0, _replayData.framedata.Count - 1);

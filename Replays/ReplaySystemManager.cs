@@ -849,7 +849,7 @@ namespace TootTallyLeaderboard.Replays
             _replayTimestampSlider.transform.SetSiblingIndex(0);
             _replayTimestampSlider.value = 0f;
             _replayTimestampSlider.maxValue = 1f;
-            _replayTimestampSlider.minValue = 0f;
+            _replayTimestampSlider.minValue = .01f;
             RectTransform rectTransform = _replayTimestampSlider.gameObject.GetComponent<RectTransform>();
             rectTransform.sizeDelta = new Vector2(800, 20);
             rectTransform.anchoredPosition = new Vector2(-0, -195);
@@ -865,7 +865,7 @@ namespace TootTallyLeaderboard.Replays
 
                 __instance.musictrack.time = __instance.musictrack.clip.length * value;
                 __instance.syncTrackPositions(__instance.musictrack.time); //SyncTrack in case smooth scrolling is on
-                __instance.currentnoteindex = Mathf.Clamp(__instance.leveldata.FindIndex(note => note[0] * __instance.defaultnotelength >= Mathf.Abs((float)__instance.track_xpos_smoothscrolling)) - 1, 0, __instance.leveldata.Count);
+                __instance.currentnoteindex = Mathf.Clamp(__instance.leveldata.FindIndex(note => note[0] * __instance.defaultnotelength >= Mathf.Abs((float)__instance.track_xpos_smoothscrolling)) - 1, 0, __instance.leveldata.Count - 1);
                 __instance.grabNoteRefs(0); //the parameter is the note increment. Putting 0 just gets the noteData for currentnoteindex's value
                 __instance.beatstoshow = __instance.currentnoteindex + TrombLoader.Plugin.Instance.beatsToShow.Value;
                 _replay.OnReplayRewind(__instance.musictrack.time, __instance);
