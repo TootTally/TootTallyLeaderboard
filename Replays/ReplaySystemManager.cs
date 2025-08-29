@@ -609,7 +609,7 @@ namespace TootTallyLeaderboard.Replays
         {
             TootTallyGlobalVariables.wasReplaying = _hasPaused = _hasReleaseToot = false;
             _elapsedTime = 0;
-            _targetFramerate = Application.targetFrameRate > 60 || Application.targetFrameRate < 1 ? 60 : Application.targetFrameRate; //Could let the user choose replay framerate... but risky for when they will upload to our server
+            _targetFramerate = Application.targetFrameRate > 120 || Application.targetFrameRate < 1 ? 120 : Application.targetFrameRate; //Could let the user choose replay framerate... but risky for when they will upload to our server
             _replay.SetupRecording(_targetFramerate);
             _replayManagerState = ReplayManagerState.Recording;
             TootTallyGlobalVariables.isReplaying = false;
@@ -854,7 +854,7 @@ namespace TootTallyLeaderboard.Replays
             rectTransform.sizeDelta = new Vector2(800, 20);
             rectTransform.anchoredPosition = new Vector2(-0, -195);
 
-            _replayTimestampSlider.onValueChanged.AddListener((float value) =>
+            _replayTimestampSlider.onValueChanged.AddListener(value =>
             {
                 for (int i = __instance.currentnoteindex; i <= __instance.beatstoshow && i < __instance.allnotes.Count - 1; i++)
                 {

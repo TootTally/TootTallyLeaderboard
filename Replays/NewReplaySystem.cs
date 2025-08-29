@@ -23,7 +23,7 @@ namespace TootTallyLeaderboard.Replays
     public class NewReplaySystem
     {
         public static List<string> incompatibleReplayVersions = new List<string> { "1.0.0" };
-        public const string REPLAY_VERSION = "2.1.2";
+        public const string REPLAY_VERSION = "2.1.3";
 
         private int _frameIndex, _tootIndex;
 
@@ -408,7 +408,7 @@ namespace TootTallyLeaderboard.Replays
         private void PlaybackTimeFrameData(float time)
         {
 
-            if (_lastFrame != _currentFrame && time >= _currentFrame[(int)FDStruct.T])
+            if (_lastFrame != _currentFrame && _currentFrame != null && time >= _currentFrame[(int)FDStruct.T])
                 _lastFrame = _currentFrame;
 
             if (_replayData.framedata.Count > _frameIndex && (_currentFrame == null || time >= _currentFrame[(int)FDStruct.T]))
