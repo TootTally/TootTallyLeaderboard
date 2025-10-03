@@ -1,5 +1,11 @@
 #### Changelog:
 
+`v1.2.3` -> `v1.2.5`
+
+```diff
++ Compatibility for 1.28B
+```
+
 `v1.2.2` -> `v1.2.3`
 
 ```diff
