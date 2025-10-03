@@ -433,21 +433,23 @@ namespace TootTallyLeaderboard.Replays
             rect.anchorMin = rect.anchorMax = new Vector2(.5f, .18f);
             rect.pivot = new Vector2(.5f, .5f);
             _toottallyPauseWarning.GetComponent<Image>().color = new Color(.1f, .1f, 0, .5f);
-            var border = _toottallyPauseWarning.transform.GetChild(0).gameObject;
+            var border = _toottallyPauseWarning.transform.Find("border").gameObject;
             border.GetComponent<Image>().color = new Color(1, 1, 0, .3f);
-            GameObjectFactory.DestroyFromParent(border, "Image (1)");
-            GameObjectFactory.DestroyFromParent(border, "Image (2)");
-            GameObjectFactory.DestroyFromParent(border, "Image (3)");
-            GameObjectFactory.DestroyFromParent(border, "txt-track-vol");
+            var content = _toottallyPauseWarning.transform.Find("content").gameObject;
+            GameObjectFactory.DestroyFromParent(content, "img-btn_r");
+            GameObjectFactory.DestroyFromParent(content, "img-btn_minus");
+            GameObjectFactory.DestroyFromParent(content, "img-btn_plus");
+            GameObjectFactory.DestroyFromParent(content, "txt-track-vol");
 
-            var text = border.transform.Find("txt-quick-restart").GetComponent<Text>();
+            var text = content.transform.Find("txt-quick-restart").GetComponent<Text>();
             if (text.TryGetComponent(out LocalizeStringEvent locEvent))
                 GameObject.DestroyImmediate(locEvent);
             text.text = "Scores will not submit if you pause";
             text.fontSize = 8;
             text.rectTransform.anchoredPosition = Vector2.zero;
-            text.rectTransform.anchorMin = text.rectTransform.anchorMax = new Vector2(.1f, .5f);
+            text.rectTransform.anchorMin = text.rectTransform.anchorMax = text.rectTransform.pivot = new Vector2(.5f, .5f);
             text.rectTransform.sizeDelta = new Vector2(180, 0);
+            text.alignment = TextAnchor.MiddleCenter;
         }
 
 
