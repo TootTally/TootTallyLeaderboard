@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
-using HarmonyLib;
+﻿using HarmonyLib;
+using System.Collections.Generic;
+using TootTallyCore.Graphics;
+using TootTallyLeaderboard.Replays;
 using UnityEngine;
 
 namespace TootTallyLeaderboard
@@ -10,6 +12,14 @@ namespace TootTallyLeaderboard
 
         private static GlobalLeaderboard globalLeaderboard;
         #region HarmonyPatches
+
+        [HarmonyPatch(typeof(GameObjectFactory), nameof(GameObjectFactory.OnHomeControllerInitialize))]
+        [HarmonyPostfix]
+        public static void OnGameObjectFactoryInitLoadCachedReplays()
+        {
+            if (Plugin.Instance.option.LoadLocalReplays.Value)
+                CachedReplays.LoadCachedReplays();
+        }
 
         [HarmonyPatch(typeof(LevelSelectController), nameof(LevelSelectController.Start))]
         [HarmonyPostfix]
@@ -163,8 +173,11 @@ namespace TootTallyLeaderboard
                     break;
 
                 case GlobalLeaderboard.LeaderboardState.ReadyToRefresh:
-                    globalLeaderboard.RefreshLeaderboard();
-                    break;
+                    if (Plugin.Instance.option.LoadLocalReplays.Value)
+                        Plugin.Instance.StartCoroutine(globalLeaderboard.RefreshLeaderboardLocal());
+                    else
+                        globalLeaderboard.RefreshLeaderboard();
+                        break;
 
                 case GlobalLeaderboard.LeaderboardState.ErrorUnexpected:
                     Plugin.LogError("Unexpected Error during leaderboard Update request");

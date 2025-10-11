@@ -569,6 +569,7 @@ namespace TootTallyLeaderboard.Replays
                     TootTallyNotifManager.DisplayNotif("Downloading replay...");
                     Plugin.Instance.StartCoroutine(TootTallyAPIService.DownloadReplay(replayId, uuid =>
                     {
+                        CachedReplays.AddReplayIfNotExist($"{Path.Combine(Paths.BepInExRootPath, "Replays/")}{replayId}.ttr", SongDataHelper.GetChoosenSongHash());
                         ResolveLoadReplay(uuid, levelSelectControllerInstance);
                     }));
                     break;
@@ -781,6 +782,7 @@ namespace TootTallyLeaderboard.Replays
             try
             {
                 FileHelper.WriteJsonToFile(replayDir + "\\", _replayUUID + ".ttr", _replay.GetRecordedReplayJson(_replayUUID));
+                CachedReplays.AddReplayIfNotExist($"{replayDir}\\{_replayUUID}.ttr", SongDataHelper.GetChoosenSongHash());
             }
             catch (Exception e)
             {

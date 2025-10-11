@@ -50,6 +50,7 @@ namespace TootTallyLeaderboard
         private Vector2 _starRatingMaskSizeTarget;
         private RectTransform _diffRatingMaskRectangle;
         private List<LeaderboardRowEntry> _scoreGameObjectList;
+        private List<SerializableClass.ScoreDataFromDB> _tempAllReplayData;
         private SerializableClass.SongDataFromDB _songData;
         //private Chart _localSongData;
         private Slider _slider, _gameSpeedSlider;
@@ -71,6 +72,7 @@ namespace TootTallyLeaderboard
             _levelSelectControllerInstance = __instance;
             _currentLeaderboardCoroutines = new List<IEnumerator<UnityWebRequestAsyncOperation>>();
             _scoreGameObjectList = new List<LeaderboardRowEntry>();
+            _tempAllReplayData = new List<SerializableClass.ScoreDataFromDB>();
             _speedToDiffDict = new Dictionary<int, float>();
             ClearBaseLeaderboard();
             CustomizeGameMenuUI(__instance);
@@ -446,44 +448,74 @@ namespace TootTallyLeaderboard
         }
 
         //THIS IS JUST IN TESTING PHASE, NOT TO BE USED
-        public void RefreshLeaderboardLocal()
+
+        public IEnumerator<UnityWebRequest> RefreshLeaderboardLocal()
         {
+            ShowLoadingSwirly();
             var count = 1;
             _localScoreId = -1;
+            _tempAllReplayData.Clear();
             var cachedReplays = CachedReplays.GetReplayPathsFromSongHash(_songHash);
+            var savedSongHash = _songHash;
             foreach (var cachedData in cachedReplays)
             {
-                var replayData = JsonConvert.DeserializeObject<NewReplaySystem.ReplayData>(FileHelper.ReadJsonFromFile("", cachedData.filePath));
-                var convertedData = new SerializableClass.ScoreDataFromDB()
+                if (_songHash != savedSongHash) yield break;
+                if (!File.Exists(cachedData.filePath))
                 {
-                    grade = "SSS",
-                    is_rated = false,
-                    max_combo = replayData.maxcombo,
-                    modifiers = replayData.gamemodifiers.Split(','),
-                    percentage = 1f,
-                    tt = 69f,
-                    score = replayData.finalscore,
-                    replay_speed = replayData.gamespeedmultiplier,
-                    perfect = replayData.finalnotetallies[4],
-                    nice = replayData.finalnotetallies[3],
-                    okay = replayData.finalnotetallies[2],
-                    meh = replayData.finalnotetallies[1],
-                    nasty = replayData.finalnotetallies[0],
-                    game_version = replayData.gameversion,
-                    replay_id = replayData.uuid,
-                    player = replayData.username,
-                    played_on = "",
-                    player_id = 1
-                };
-                LeaderboardRowEntry rowEntry = LeaderboardFactory.CreateLeaderboardRowEntryFromScore(_scoreboard.transform, $"RowEntry{convertedData.player}", convertedData, count, gradeToColorDict[convertedData.grade], _levelSelectControllerInstance);
+                    Plugin.LogError($"File {cachedData.filePath} didn't exist. Deleting from cache.");
+                    CachedReplays.DeleteReplayFromSongHash(cachedData);
+                    continue;
+                }
+                try
+                {
+                    var replayData = JsonConvert.DeserializeObject<NewReplaySystem.ReplayData>(FileHelper.ReadJsonFromFile("", cachedData.filePath));
+                    var percent = (float)replayData.finalscore / DiffCalcGlobals.selectedChart.maxScore;
+                    var gamePercent = (float)replayData.finalscore / DiffCalcGlobals.selectedChart.gameMaxScore;
+                    var convertedData = new SerializableClass.ScoreDataFromDB()
+                    {
+                        grade = GetGradeFromLocalReplay(replayData.finalnotetallies, gamePercent),
+                        is_rated = _songData.is_rated,
+                        max_combo = replayData.maxcombo,
+                        modifiers = replayData.gamemodifiers.Length == 0 || replayData.gamemodifiers.ToUpper().Contains("NONE") ? null : replayData.gamemodifiers.Split(','),
+                        percentage = percent * 100f,
+                        tt = GetTTFromLocalReplay(replayData, percent),
+                        score = replayData.finalscore,
+                        replay_speed = replayData.gamespeedmultiplier,
+                        perfect = replayData.finalnotetallies[0],
+                        nice = replayData.finalnotetallies[1],
+                        okay = replayData.finalnotetallies[2],
+                        meh = replayData.finalnotetallies[3],
+                        nasty = replayData.finalnotetallies[4],
+                        game_version = replayData.gameversion,
+                        replay_id = replayData.uuid,
+                        player = replayData.username,
+                        played_on = "",
+                        player_id = 1,
+                    };
+                    _tempAllReplayData.Add(convertedData);
+                }
+                catch (Exception e)
+                { 
+                    Plugin.LogError($"Couldn't parse  replay {cachedData.filePath}.");
+                    CachedReplays.DeleteReplayFromSongHash(cachedData);
+                }
+                yield return null;
+            }
+            HideLoadingSwirly();
+            foreach (var replayData in _tempAllReplayData.OrderByDescending(r => r.tt))
+            {
+                if (_songHash != savedSongHash) yield break;
+
+                LeaderboardRowEntry rowEntry = LeaderboardFactory.CreateLeaderboardRowEntryFromScore(_scoreboard.transform, $"RowEntry{replayData.player}", replayData, count, gradeToColorDict[replayData.grade], _levelSelectControllerInstance);
                 _scoreGameObjectList.Add(rowEntry);
-                if (convertedData.player == TootTallyUser.userInfo.username)
+                if (replayData.player == TootTallyUser.userInfo.username)
                 {
                     rowEntry.imageStrip.color = Theme.colors.leaderboard.yourRowEntry;
                     rowEntry.imageStrip.gameObject.SetActive(true);
                     _localScoreId = count - 1;
                 }
                 count++;
+                yield return null;
             }
             if (_scoreGameObjectList.Count > 8)
             {
@@ -493,6 +525,22 @@ namespace TootTallyLeaderboard
             }
             else
                 HideSlider();
+        }
+
+        public float GetTTFromLocalReplay(NewReplaySystem.ReplayData data, float percent) =>
+            TootTallyDiffCalcLibs.Utils.CalculateScoreTT(DiffCalcGlobals.selectedChart, data.gamespeedmultiplier, data.finalnotetallies[0] + data.finalnotetallies[1], data.finalnotetallies.Sum(), percent, data.gamemodifiers.Split(','));
+
+        public string GetGradeFromLocalReplay(int[] tally, float gamePercent)
+        {
+            var noteCount = DiffCalcGlobals.selectedChart.GetNoteCount();
+            if (tally[0] >= noteCount) return "SSS";
+            else if (tally[4] + tally[3] + tally[2] == 0) return "SS";
+            else if (gamePercent >= 1f) return "S";
+            else if (gamePercent >= .8f) return "A";
+            else if (gamePercent >= .6f) return "B";
+            else if (gamePercent >= .4f) return "C";
+            else if (gamePercent >= .2f) return "D";
+            return "F";
         }
 
         public void SetOnSliderValueChangeEvent()

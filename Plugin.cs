@@ -68,7 +68,8 @@ namespace TootTallyLeaderboard
                 SubmitScores = Config.Bind("General", "Suibmit Scores", true, "Submit your scores to the Toottally leaderboard."),
                 SessionDate = Config.Bind("General", "Session Date", DateTime.Now.ToString(), "The last time that the session started recording."),
                 SessionStartTT = Config.Bind("General", "TT Session Start", 0f, "The amount of TT you started the session with."),
-                ShowcaseMode = Config.Bind("General", "Replay Showcase Mode", false, "Hides the replay HUD and mouse cursor when viewing a replay.")
+                ShowcaseMode = Config.Bind("General", "Replay Showcase Mode", false, "Hides the replay HUD and mouse cursor when viewing a replay."),
+                LoadLocalReplays = Config.Bind("General", "Load Local Replays", false, "Only load local replays instead of the online leaderboard.")
             };
 
             TootTallySettings.Plugin.MainTootTallySettingPage.AddToggle("Show Leaderboard", option.ShowLeaderboard);
@@ -76,15 +77,21 @@ namespace TootTallyLeaderboard
             TootTallySettings.Plugin.MainTootTallySettingPage.AddToggle("Show Cool S", option.ShowCoolS);
             TootTallySettings.Plugin.MainTootTallySettingPage.AddToggle("Submit Scores", option.SubmitScores);
             TootTallySettings.Plugin.MainTootTallySettingPage.AddToggle("Replay Showcase Mode", option.ShowcaseMode);
+            TootTallySettings.Plugin.MainTootTallySettingPage.AddToggle("Load Local Replays", option.LoadLocalReplays, OnToggleLocalReplaysLoadReplays);
             AssetManager.LoadAssets(Path.Combine(Path.GetDirectoryName(Instance.Info.Location), "Assets"));
 
             ShouldUpdateSession = DateTime.Parse(Instance.option.SessionDate.Value).Date.CompareTo(DateTime.Now.Date) < 0;
             //Will make this async before making it active
-            //CachedReplays.LoadCachedReplays();
             _harmony.PatchAll(typeof(LeaderboardFactory));
             _harmony.PatchAll(typeof(ReplaySystemManager));
             _harmony.PatchAll(typeof(GlobalLeaderboardManager));
             LogInfo($"Module loaded!");
+        }
+
+        public static void OnToggleLocalReplaysLoadReplays(bool value)
+        {
+            if (value)
+                CachedReplays.LoadCachedReplays();
         }
 
         public void UnloadModule()
@@ -103,6 +110,7 @@ namespace TootTallyLeaderboard
             public ConfigEntry<string> SessionDate { get; set; }
             public ConfigEntry<float> SessionStartTT { get; set; }
             public ConfigEntry<bool> ShowcaseMode { get; set; }
+            public ConfigEntry<bool> LoadLocalReplays { get; set; }
         }
     }
 }
