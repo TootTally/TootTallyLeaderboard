@@ -1,5 +1,12 @@
 #### Changelog:
 
+`v1.2.5` -> `v1.2.6`
+
+```diff
++ Fixed Temp Replay button working in multi
++ Fixed crash when leaving the point scene before score submit
+```
+
 `v1.2.3` -> `v1.2.5`
 
 ```diff
