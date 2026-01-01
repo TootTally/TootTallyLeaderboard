@@ -72,6 +72,7 @@ namespace TootTallyLeaderboard.Replays
         public static void GameControllerPrefixPatch(GameController __instance)
         {
             TootTallyGlobalVariables.wasReplaying = _replayFileName != null && _replayFileName != "Spectating";
+            _tootTallyScorePanel = null;
             if (_replay == null)
             {
                 _replayManagerState = ReplayManagerState.None;
@@ -248,14 +249,15 @@ namespace TootTallyLeaderboard.Replays
 
                 GameObject UICanvas = lowerRightPanel.transform.parent.gameObject;
 
-                GameObjectFactory.CreateCustomButton(UICanvas.transform, new Vector2(-225, -225), new Vector2(64, 20), "Replay", "WatchReplayButton", delegate
-                {
-                    _replayFileName = "TempReplay";
-                    _replay.SetUsernameAndSongName(TootTallyUser.userInfo.username, GlobalVariables.chosen_track_data.trackname_long);
-                    Plugin.LogInfo("TempReplay Loaded");
-                    __instance.clickRetry();
-                })
-                .textHolder.fontSize = 14;
+                if (!TootTallyGlobalVariables.isPlayingMultiplayer)
+                    GameObjectFactory.CreateCustomButton(UICanvas.transform, new Vector2(-225, -225), new Vector2(64, 20), "Replay", "WatchReplayButton", delegate
+                    {
+                        _replayFileName = "TempReplay";
+                        _replay.SetUsernameAndSongName(TootTallyUser.userInfo.username, GlobalVariables.chosen_track_data.trackname_long);
+                        Plugin.LogInfo("TempReplay Loaded");
+                        __instance.clickRetry();
+                    })
+                    .textHolder.fontSize = 14;
 
                 GameObject ttHitbox = LeaderboardFactory.CreateDefaultPanel(UICanvas.transform, new Vector2(365, -23), new Vector2(56, 112), "ScorePanelHitbox");
                 GameObjectFactory.CreateSingleText(ttHitbox.transform, "ScorePanelHitboxText", "<", GameObjectFactory.TextFont.Multicolore);
@@ -916,7 +918,8 @@ namespace TootTallyLeaderboard.Replays
                         {
                             Plugin.LogInfo($"Replay failed to submit after {submitAttemptCount} attempts, skipping replay submission.");
                             _loadingSwirly?.Dispose();
-                            GameObjectFactory.CreateSingleText(_tootTallyScorePanel.transform, "TextMain", "Score submission disabled for that map.");
+                            if (_tootTallyScorePanel != null)
+                                GameObjectFactory.CreateSingleText(_tootTallyScorePanel.transform, "TextMain", "Score submission disabled for that map.");
                         }
                         return;
                     }
@@ -940,6 +943,7 @@ namespace TootTallyLeaderboard.Replays
                 if (replay.isBestPlay)
                     displayMessage += $"Rank: {TootTallyUser.userInfo.rank} -> {replay.ranking} (+{rankDiff})";
                 TootTallyNotifManager.DisplayNotif(displayMessage);
+                if (_tootTallyScorePanel == null) return;
                 GameObjectFactory.CreateSingleText(_tootTallyScorePanel.transform, "TextSubmit", "Replay submitted." + (replay.isBestPlay ? " New Personal best!" : ""));
                 if (!replay.isBestPlay)
                     GameObjectFactory.CreateSingleText(_tootTallyScorePanel.transform, "TextPosition", $"{replay.tt:0.00}tt");
@@ -955,6 +959,8 @@ namespace TootTallyLeaderboard.Replays
             else
             {
                 _loadingSwirly?.Dispose();
+
+                if (_tootTallyScorePanel == null) return;
                 GameObjectFactory.CreateSingleText(_tootTallyScorePanel.transform, "TextMain", "Map not rated, no data found.");
                 GameObjectFactory.CreateSingleText(_tootTallyScorePanel.transform, "TextPosition", $"Score position: #{replay.position}");
             }
