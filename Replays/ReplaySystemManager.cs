@@ -462,7 +462,8 @@ namespace TootTallyLeaderboard.Replays
             switch (_replayManagerState)
             {
                 case ReplayManagerState.Recording:
-                    Plugin.Instance.StartCoroutine(TootTallyAPIService.OnReplayStopUUID(TootTallyAccounts.Plugin.GetAPIKey, SongDataHelper.GetChoosenSongHash(), _replayUUID));
+                    if (_replayUUID != null && _replayUUID != "")
+                        Plugin.Instance.StartCoroutine(TootTallyAPIService.OnReplayStopUUID(TootTallyAccounts.Plugin.GetAPIKey, _replayUUID));
                     Plugin.LogInfo($"UUID deleted: {_replayUUID}");
                     _replayUUID = null;
                     if (_replayFileName == null)
@@ -605,7 +606,7 @@ namespace TootTallyLeaderboard.Replays
             {
                 if (songHashInDB == 0)
                     _replayUUID = null;
-                else
+                else if (!_hasPaused)
                     Plugin.Instance.StartCoroutine(TootTallyAPIService.GetReplayUUID(TootTallyAccounts.Plugin.GetAPIKey, SongDataHelper.GetChoosenSongHash(), ReplaySystemManager.gameSpeedMultiplier, UUID => _replayUUID = UUID));
             }));
         }

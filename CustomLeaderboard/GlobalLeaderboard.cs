@@ -261,7 +261,7 @@ namespace TootTallyLeaderboard
                     verticalLayoutGroup.childAlignment = TextAnchor.MiddleCenter;
                     verticalLayoutGroup.childForceExpandHeight = verticalLayoutGroup.childForceExpandWidth = true;
 
-                    Plugin.Instance.StartCoroutine(TootTallyAPIService.GetUserFromID(TootTallyUser.userInfo.id, user =>
+                    _currentLeaderboardCoroutines.Add(TootTallyAPIService.GetUserFromID(TootTallyUser.userInfo.id, user =>
                     {
                         AssetManager.GetProfilePictureByID(user.id, sprite =>
                         {
@@ -281,6 +281,7 @@ namespace TootTallyLeaderboard
                         var t2 = GameObjectFactory.CreateSingleText(mainPanel.transform, "TTLabel", $"{user.tt}tt (<color=\"green\">{(sessionTT > 0 ? "+" : "")}{sessionTT:0.00}tt</color>)");
                         _profilePopupLoadingSwirly.Dispose();
                     }));
+                    Plugin.Instance.StartCoroutine(_currentLeaderboardCoroutines.Last());
 
                     new SlideTooltip(ttHitbox, _profilePopup, new Vector2(525, -300), new Vector2(282, -155));
                 }
