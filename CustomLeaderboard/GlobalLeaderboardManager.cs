@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using TootTallyCore.Graphics;
 using TootTallyLeaderboard.Replays;
 using UnityEngine;
@@ -60,7 +61,9 @@ namespace TootTallyLeaderboard
                 UpdateLeaderboardOnAdvanceSongsPostfix(___alltrackslist, __instance);
         }
 
+        [HarmonyPatch(typeof(LevelSelectController), nameof(LevelSelectController.clickBack))]
         [HarmonyPatch(typeof(LevelSelectController), nameof(LevelSelectController.clickPlay))]
+        [HarmonyPatch(typeof(LoadController), nameof(LoadController.Start))]
         [HarmonyPostfix]
         static void OnLevelSelectControllerClickPlayDeleteLeaderboard(LevelSelectController __instance)
         {
@@ -68,16 +71,6 @@ namespace TootTallyLeaderboard
             globalLeaderboard.CancelAndClearAllCoroutineInList();
             globalLeaderboard = null;
         }
-
-        [HarmonyPatch(typeof(LevelSelectController), nameof(LevelSelectController.clickBack))]
-        [HarmonyPostfix]
-        static void OnLevelSelectControllerClickBackDeleteLeaderboard(LevelSelectController __instance)
-        {
-            if (globalLeaderboard == null) return;
-            globalLeaderboard.CancelAndClearAllCoroutineInList();
-            globalLeaderboard = null;
-        }
-
 
         [HarmonyPatch(typeof(LeaderboardManager), nameof(LeaderboardManager.clickTab))]
         [HarmonyPrefix]
@@ -174,7 +167,7 @@ namespace TootTallyLeaderboard
 
                 case GlobalLeaderboard.LeaderboardState.ReadyToRefresh:
                     if (Plugin.Instance.option.LoadLocalReplays.Value)
-                        Plugin.Instance.StartCoroutine(globalLeaderboard.RefreshLeaderboardLocal());
+                        globalLeaderboard.StartLocalLeaderboardRoutine();
                     else
                         globalLeaderboard.RefreshLeaderboard();
                         break;

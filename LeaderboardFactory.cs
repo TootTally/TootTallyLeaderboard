@@ -349,7 +349,8 @@ namespace TootTallyLeaderboard
                             $"Nice: {tally[3]}\n" +
                             $"Okay: {tally[2]}\n" +
                             $"Meh: {tally[1]}\n" +
-                            $"Nasty: {tally[0]}\n" : "No Tally";
+                            $"Nasty: {tally[0]}\n" +
+                            $"Gaps: {tally[5]}": "No Tally";
 
         public static GameObject CreateDefaultPanel(Transform canvasTransform, Vector2 anchoredPosition, Vector2 size, string name)
         {

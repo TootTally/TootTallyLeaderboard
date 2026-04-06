@@ -427,7 +427,7 @@ namespace TootTallyLeaderboard
             _localScoreId = -1;
             foreach (SerializableClass.ScoreDataFromDB scoreData in _scoreDataList)
             {
-                LeaderboardRowEntry rowEntry = LeaderboardFactory.CreateLeaderboardRowEntryFromScore(_scoreboard.transform, $"RowEntry{scoreData.player}", scoreData, count, gradeToColorDict[scoreData.grade], _levelSelectControllerInstance) ;
+                LeaderboardRowEntry rowEntry = LeaderboardFactory.CreateLeaderboardRowEntryFromScore(_scoreboard.transform, $"RowEntry{scoreData.player}", scoreData, count, gradeToColorDict[scoreData.grade], _levelSelectControllerInstance);
                 _scoreGameObjectList.Add(rowEntry);
                 if (scoreData.player == TootTallyUser.userInfo.username)
                 {
@@ -448,8 +448,13 @@ namespace TootTallyLeaderboard
         }
 
         //THIS IS JUST IN TESTING PHASE, NOT TO BE USED
+        public void StartLocalLeaderboardRoutine()
+        {
+            _currentLeaderboardCoroutines.Add(RefreshLeaderboardLocal());
+            Plugin.Instance.StartCoroutine(_currentLeaderboardCoroutines.Last());
+        }
 
-        public IEnumerator<UnityWebRequest> RefreshLeaderboardLocal()
+        public IEnumerator<UnityWebRequestAsyncOperation> RefreshLeaderboardLocal()
         {
             ShowLoadingSwirly();
             var count = 1;
@@ -486,6 +491,7 @@ namespace TootTallyLeaderboard
                         okay = replayData.finalnotetallies[2],
                         meh = replayData.finalnotetallies[3],
                         nasty = replayData.finalnotetallies[4],
+                        missed_gaps = replayData.notedata.Count(x => x[(int)NewReplaySystem.NDStruct.R] == 0),
                         game_version = replayData.gameversion,
                         replay_id = replayData.uuid,
                         player = replayData.username,
@@ -495,7 +501,7 @@ namespace TootTallyLeaderboard
                     _tempAllReplayData.Add(convertedData);
                 }
                 catch (Exception e)
-                { 
+                {
                     Plugin.LogError($"Couldn't parse  replay {cachedData.filePath}.");
                     CachedReplays.DeleteReplayFromSongHash(cachedData);
                 }
@@ -579,12 +585,16 @@ namespace TootTallyLeaderboard
 
         public void CancelAndClearAllCoroutineInList()
         {
+            if (_currentLeaderboardCoroutines.Count <= 0) return;
+            Plugin.LogInfo($"Stopping {_currentLeaderboardCoroutines.Count} leaderboard coroutines.");
             _currentLeaderboardCoroutines.ForEach(Plugin.Instance.StopCoroutine);
             _currentLeaderboardCoroutines.Clear();
         }
 
-        public void ShowSlider() => _slider.gameObject.SetActive(true); public void HideSlider() => _slider.gameObject.SetActive(false);
-        public void ShowErrorText() => _errorsHolder.SetActive(true); public void HideErrorText() => _errorsHolder.SetActive(false);
+        public void ShowSlider() => _slider.gameObject.SetActive(true);
+        public void HideSlider() => _slider.gameObject.SetActive(false);
+        public void ShowErrorText() => _errorsHolder.SetActive(true);
+        public void HideErrorText() => _errorsHolder.SetActive(false);
 
         public static void OpenUserProfile(int id) => Application.OpenURL($"https://toottally.com/profile/{id}");
         public static void OpenLoginPage() => Application.OpenURL("https://toottally.com/login");
