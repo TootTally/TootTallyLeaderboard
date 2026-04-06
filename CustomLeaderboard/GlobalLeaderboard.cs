@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -37,6 +38,7 @@ namespace TootTallyLeaderboard
         #endregion
 
         private List<IEnumerator<UnityWebRequestAsyncOperation>> _currentLeaderboardCoroutines;
+        private IEnumerator<UnityWebRequestAsyncOperation> _profilePictureRequest;
 
         private LevelSelectController _levelSelectControllerInstance;
 
@@ -261,7 +263,7 @@ namespace TootTallyLeaderboard
                     verticalLayoutGroup.childAlignment = TextAnchor.MiddleCenter;
                     verticalLayoutGroup.childForceExpandHeight = verticalLayoutGroup.childForceExpandWidth = true;
 
-                    _currentLeaderboardCoroutines.Add(TootTallyAPIService.GetUserFromID(TootTallyUser.userInfo.id, user =>
+                    _profilePictureRequest = TootTallyAPIService.GetUserFromID(TootTallyUser.userInfo.id, user =>
                     {
                         AssetManager.GetProfilePictureByID(user.id, sprite =>
                         {
@@ -280,8 +282,9 @@ namespace TootTallyLeaderboard
                         var t = GameObjectFactory.CreateSingleText(mainPanel.transform, "NameLabel", $"{user.username} #{user.rank}");
                         var t2 = GameObjectFactory.CreateSingleText(mainPanel.transform, "TTLabel", $"{user.tt}tt (<color=\"green\">{(sessionTT > 0 ? "+" : "")}{sessionTT:0.00}tt</color>)");
                         _profilePopupLoadingSwirly.Dispose();
-                    }));
-                    Plugin.Instance.StartCoroutine(_currentLeaderboardCoroutines.Last());
+                        _profilePictureRequest = null;
+                    });
+                    Plugin.Instance.StartCoroutine(_profilePictureRequest);
 
                     new SlideTooltip(ttHitbox, _profilePopup, new Vector2(525, -300), new Vector2(282, -155));
                 }
@@ -584,12 +587,27 @@ namespace TootTallyLeaderboard
             _scoreGameObjectList.Clear();
         }
 
+        public void CancelProfilePictureRequest()
+        {
+            if (_profilePictureRequest == null) return;
+            Plugin.Instance.StopCoroutine(_profilePictureRequest);
+        }
+
         public void CancelAndClearAllCoroutineInList()
         {
             if (_currentLeaderboardCoroutines.Count <= 0) return;
             Plugin.LogInfo($"Stopping {_currentLeaderboardCoroutines.Count} leaderboard coroutines.");
             _currentLeaderboardCoroutines.ForEach(Plugin.Instance.StopCoroutine);
             _currentLeaderboardCoroutines.Clear();
+        }
+
+        public void CancelCoroutineInList(IEnumerator<UnityWebRequestAsyncOperation> c)
+        {
+            if (_currentLeaderboardCoroutines.Contains(c))
+            {
+                Plugin.Instance.StopCoroutine(c);
+                _currentLeaderboardCoroutines.Remove(c);
+            }
         }
 
         public void ShowSlider() => _slider.gameObject.SetActive(true);

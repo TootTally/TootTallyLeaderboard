@@ -69,6 +69,7 @@ namespace TootTallyLeaderboard
         {
             if (globalLeaderboard == null) return;
             globalLeaderboard.CancelAndClearAllCoroutineInList();
+            globalLeaderboard.CancelProfilePictureRequest();
             globalLeaderboard = null;
         }
 
