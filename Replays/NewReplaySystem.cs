@@ -227,7 +227,7 @@ namespace TootTallyLeaderboard.Replays
             _isLastNote = false;
             _currentFrame = _replayData.framedata.Count > 0 ? _replayData.framedata.First() : null;
             _currentNote = _replayData.notedata.Count > 0 ? _replayData.notedata.First() : null;
-            _currentToot = new dynamic[] { 0, 0, 0, new List<int>()};
+            _currentToot = new dynamic[] { 0, 0, 0, new List<int>() };
         }
 
         public void OnReplayRewind(float newTiming, GameController __instance)
@@ -249,13 +249,24 @@ namespace TootTallyLeaderboard.Replays
 
             if (_replayData.notedata.Count != 0 && __instance.currentnoteindex != 0)
             {
-                __instance.currentscore = (int)_replayData.notedata.Find(note => (int)note[(int)NDStruct.I] == __instance.currentnoteindex - 1)[(int)NDStruct.S];
-                var allNoteTally = _replayData.notedata.Where(note => (int)note[(int)NDStruct.I] <= __instance.currentnoteindex - 1).Select(note => note[(int)NDStruct.TL]);
-                __instance.scores_A = allNoteTally.Count(tally => tally == 4);
-                __instance.scores_B = allNoteTally.Count(tally => tally == 3);
-                __instance.scores_C = allNoteTally.Count(tally => tally == 2);
-                __instance.scores_D = allNoteTally.Count(tally => tally == 1);
-                __instance.scores_F = allNoteTally.Count(tally => tally == 0);
+                var allPrevNotes = _replayData.notedata.Where(note => (int)note[(int)NDStruct.I] <= __instance.currentnoteindex - 1);
+                if (allPrevNotes.Count() > 0)
+                {
+                    __instance.currentscore = (int)allPrevNotes.Last()[(int)NDStruct.S];
+                    var allNoteTally = allPrevNotes.Select(note => note[(int)NDStruct.TL]);
+                    __instance.scores_A = allNoteTally.Count(tally => (int)tally == 4);
+                    __instance.scores_B = allNoteTally.Count(tally => (int)tally == 3);
+                    __instance.scores_C = allNoteTally.Count(tally => (int)tally == 2);
+                    __instance.scores_D = allNoteTally.Count(tally => (int)tally == 1);
+                    __instance.scores_F = allNoteTally.Count(tally => (int)tally == 0);
+                }
+                else
+                {
+                    __instance.currentscore = 0;
+                    __instance.scores_A = __instance.scores_B = __instance.scores_C = __instance.scores_D = __instance.scores_F = 0;
+                }
+
+
             }
         }
 
