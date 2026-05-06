@@ -18,8 +18,7 @@ namespace TootTallyLeaderboard
         [HarmonyPostfix]
         public static void OnGameObjectFactoryInitLoadCachedReplays()
         {
-            if (Plugin.Instance.option.LoadLocalReplays.Value)
-                CachedReplays.LoadCachedReplays();
+            CachedReplays.LoadCachedReplays(true);
         }
 
         [HarmonyPatch(typeof(LevelSelectController), nameof(LevelSelectController.Start))]
@@ -171,7 +170,7 @@ namespace TootTallyLeaderboard
                         globalLeaderboard.StartLocalLeaderboardRoutine();
                     else
                         globalLeaderboard.RefreshLeaderboard();
-                        break;
+                    break;
 
                 case GlobalLeaderboard.LeaderboardState.ErrorUnexpected:
                     Plugin.LogError("Unexpected Error during leaderboard Update request");

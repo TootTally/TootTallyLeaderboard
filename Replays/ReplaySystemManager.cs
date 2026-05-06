@@ -572,7 +572,7 @@ namespace TootTallyLeaderboard.Replays
                     TootTallyNotifManager.DisplayNotif("Downloading replay...");
                     Plugin.Instance.StartCoroutine(TootTallyAPIService.DownloadReplay(replayId, uuid =>
                     {
-                        CachedReplays.AddReplayIfNotExist($"{Path.Combine(Paths.BepInExRootPath, "Replays/")}{replayId}.ttr", SongDataHelper.GetChoosenSongHash());
+                        CachedReplays.AddReplayIfNotExist($"{Path.Combine(Paths.BepInExRootPath, "Replays/")}{replayId}.ttr", SongDataHelper.GetChoosenSongHash(levelSelectControllerInstance.alltrackslist[levelSelectControllerInstance.songindex].trackref));
                         ResolveLoadReplay(uuid, levelSelectControllerInstance);
                     }));
                     break;
@@ -607,7 +607,7 @@ namespace TootTallyLeaderboard.Replays
                 if (songHashInDB == 0)
                     _replayUUID = null;
                 else if (!_hasPaused)
-                    Plugin.Instance.StartCoroutine(TootTallyAPIService.GetReplayUUID(TootTallyAccounts.Plugin.GetAPIKey, SongDataHelper.GetChoosenSongHash(), ReplaySystemManager.gameSpeedMultiplier, UUID => _replayUUID = UUID));
+                    Plugin.Instance.StartCoroutine(TootTallyAPIService.GetReplayUUID(TootTallyAccounts.Plugin.GetAPIKey, songHash, ReplaySystemManager.gameSpeedMultiplier, UUID => _replayUUID = UUID));
             }));
         }
 
@@ -785,7 +785,7 @@ namespace TootTallyLeaderboard.Replays
             try
             {
                 FileHelper.WriteJsonToFile(replayDir + "\\", _replayUUID + ".ttr", _replay.GetRecordedReplayJson(_replayUUID));
-                CachedReplays.AddReplayIfNotExist($"{replayDir}\\{_replayUUID}.ttr", SongDataHelper.GetChoosenSongHash());
+                CachedReplays.AddReplayIfNotExist($"{replayDir}\\{_replayUUID}.ttr", SongDataHelper.GetChoosenSongHash(GlobalVariables.chosen_track));
             }
             catch (Exception e)
             {
@@ -849,12 +849,14 @@ namespace TootTallyLeaderboard.Replays
         }
 
         //This is absolutely the worst and most scuffed thing in the world, the game hate it when you change the musictrack time
+        private static float _lastReplayTimestamp;
         private static void SetReplayTimestampSlider(Transform canvasTransform, GameController __instance)
         {
             _replayTimestampSlider = GameObjectFactory.CreateSliderFromPrefab(canvasTransform, "TimestampSlider");
             _replayTimestampSlider.gameObject.AddComponent<GraphicRaycaster>();
             _replayTimestampSlider.transform.SetSiblingIndex(0);
-            _replayTimestampSlider.value = 0f;
+            _replayTimestampSlider.value = _lastReplayTimestamp = 0f;
+
             _replayTimestampSlider.maxValue = 1f;
             _replayTimestampSlider.minValue = .01f;
             RectTransform rectTransform = _replayTimestampSlider.gameObject.GetComponent<RectTransform>();
@@ -863,6 +865,8 @@ namespace TootTallyLeaderboard.Replays
 
             _replayTimestampSlider.onValueChanged.AddListener(value =>
             {
+                if (Mathf.Abs(_lastReplayTimestamp - value) < .01f) return;
+                _lastReplayTimestamp = value;
                 for (int i = __instance.currentnoteindex; i <= __instance.beatstoshow && i < __instance.allnotes.Count - 1; i++)
                 {
                     LeanTween.cancel(__instance.allnotes[i]);
