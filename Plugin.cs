@@ -3,6 +3,7 @@ using BepInEx;
 using BepInEx.Configuration;
 using HarmonyLib;
 using System;
+using System.Globalization;
 using System.IO;
 using TootTallyCore.Utils.Assets;
 using TootTallyCore.Utils.TootTallyModules;
@@ -66,7 +67,7 @@ namespace TootTallyLeaderboard
                 SaveAutoTootedReplays = Config.Bind("General", "Save AutoToot replays", false, "Locally save auto tooted replays. Replays still won't submit to server."),
                 ShowCoolS = Config.Bind("General", "Show Cool S", false, "Show special graphic when getting SS and SSS on a song."),
                 SubmitScores = Config.Bind("General", "Suibmit Scores", true, "Submit your scores to the Toottally leaderboard."),
-                SessionDate = Config.Bind("General", "Session Date", DateTime.Now.ToString(), "The last time that the session started recording."),
+                SessionDate = Config.Bind("General", "Session Date", DateTime.Now.ToString(CultureInfo.InvariantCulture), "The last time that the session started recording."),
                 SessionStartTT = Config.Bind("General", "TT Session Start", 0f, "The amount of TT you started the session with."),
                 ShowcaseMode = Config.Bind("General", "Replay Showcase Mode", false, "Hides the replay HUD and mouse cursor when viewing a replay."),
                 LoadLocalReplays = Config.Bind("General", "Load Local Replays", false, "Only load local replays instead of the online leaderboard.")
@@ -80,7 +81,9 @@ namespace TootTallyLeaderboard
             TootTallySettings.Plugin.MainTootTallySettingPage.AddToggle("Load Local Replays", option.LoadLocalReplays, OnToggleLocalReplaysLoadReplays);
             AssetManager.LoadAssets(Path.Combine(Path.GetDirectoryName(Instance.Info.Location), "Assets"));
 
-            ShouldUpdateSession = DateTime.Parse(Instance.option.SessionDate.Value).Date.CompareTo(DateTime.Now.Date) < 0;
+            ShouldUpdateSession = DateTime.TryParse(Instance.option.SessionDate.Value, out DateTime lastSessionDatetime)
+                ? lastSessionDatetime.Date.CompareTo(DateTime.Now.Date) < 0
+                : true; // Just force the session update if we can't parse it. It's fine.
             //Will make this async before making it active
             _harmony.PatchAll(typeof(LeaderboardFactory));
             _harmony.PatchAll(typeof(ReplaySystemManager));
