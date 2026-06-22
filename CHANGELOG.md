@@ -1,5 +1,15 @@
 #### Changelog:
 
+`v1.2.6` -> `v1.2.7`
+
+```diff
++ Lots of improvements for replays (Still working on fixing HD rewinding bug)
++ Added miss the gaps to the leaderboard entries
++ Fixed crash if you're Portuguese
++ Fixed crashes when exiting the levelselectscreen too fast
++ Fixed crash if you exited a song too fast
+```
+
 `v1.2.5` -> `v1.2.6`
 
 ```diff
