@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using BaboonAPI.Hooks.Tracks;
@@ -274,7 +275,7 @@ namespace TootTallyLeaderboard
                         if (Plugin.Instance.option.SessionStartTT.Value == 0 || Plugin.Instance.ShouldUpdateSession)
                         {
                             Plugin.Instance.ShouldUpdateSession = false;
-                            Plugin.Instance.option.SessionDate.Value = DateTime.Now.AddDays(1).ToString();
+                            Plugin.Instance.option.SessionDate.Value = DateTime.Now.AddDays(1).ToString(CultureInfo.InvariantCulture);
                             Plugin.Instance.option.SessionStartTT.Value = user.tt;
                         }
 
