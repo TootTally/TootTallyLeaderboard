@@ -57,6 +57,9 @@ namespace TootTallyLeaderboard.Replays
 
         public static IEnumerator<UnityWebRequest> ProcessReplays()
         {
+            if (!Directory.Exists(REPLAY_PATH))
+                Directory.CreateDirectory(REPLAY_PATH);
+
             var sw = Stopwatch.StartNew();
             var newReplays = Directory.GetFiles(REPLAY_PATH)
                 .Where(filePath => filePath.Contains(".ttr"))

@@ -1,5 +1,5 @@
 # TootTally Leaderboard
-> Version: 1.2.8
+> Version: 1.2.9
 
 [TootTallyCore](https://toottally.com/)'s global leaderboard for custom songs and replay system.
 

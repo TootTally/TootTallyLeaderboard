@@ -1,7 +1,11 @@
-﻿using HarmonyLib;
+﻿using B83.Win32;
+using HarmonyLib;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using TootTallyCore.Graphics;
+using TootTallyDiffCalcLibs;
 using TootTallyLeaderboard.Replays;
 using UnityEngine;
 
@@ -25,6 +29,7 @@ namespace TootTallyLeaderboard
         [HarmonyPostfix]
         public static void OnLevelSelectControllerStartPostfix(List<SingleTrackData> ___alltrackslist, LevelSelectController __instance)
         {
+            UnityDragAndDropHook.OnDroppedFiles += OnDropFileEvent;
             _hasLeaderboardFinishedLoading = false;
             if (!Plugin.Instance.option.ShowLeaderboard.Value)
             {
@@ -34,7 +39,7 @@ namespace TootTallyLeaderboard
 
             globalLeaderboard = new GlobalLeaderboard();
             globalLeaderboard.Initialize(__instance);
-
+            DiffCalcGlobals.OnSelectedChartSetEvent += globalLeaderboard.UpdateStarRatingFromChart;
             globalLeaderboard.UpdateLeaderboard(__instance, ___alltrackslist, OnUpdateLeaderboardCallback);
         }
 
@@ -67,9 +72,31 @@ namespace TootTallyLeaderboard
         static void OnLevelSelectControllerClickPlayDeleteLeaderboard(LevelSelectController __instance)
         {
             if (globalLeaderboard == null) return;
+            UnityDragAndDropHook.OnDroppedFiles -= OnDropFileEvent;
+            TootTallyDiffCalcLibs.DiffCalcGlobals.OnSelectedChartSetEvent -= globalLeaderboard.UpdateStarRatingFromChart;
             globalLeaderboard.CancelAndClearAllCoroutineInList();
             globalLeaderboard.CancelProfilePictureRequest();
             globalLeaderboard = null;
+        }
+
+        private static void OnDropFileEvent(List<string> filePaths, POINT dropPoint)
+        {
+            Plugin.LogInfo("File dropped detected.");
+            if (filePaths.Count == 0) return;
+            var path = filePaths.First();
+            if (!IsDroppedFileValid(path)) return;
+            Plugin.LogInfo($"Parsing replay located at {path}");
+        }
+
+        public static bool IsDroppedFileValid(string path)
+        {
+            var isValid = true;
+            if (!path.Contains(".ttr"))
+            {
+                Plugin.LogInfo("File dropped is not a ttr file.");
+                isValid = false;
+            }
+            return isValid;
         }
 
         [HarmonyPatch(typeof(LeaderboardManager), nameof(LeaderboardManager.clickTab))]

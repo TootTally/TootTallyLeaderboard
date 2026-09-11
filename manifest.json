@@ -1,6 +1,6 @@
 {
     "name": "TootTallyLeaderboard",
-    "version_number": "1.2.8",
+    "version_number": "1.2.9",
     "website_url": "https://github.com/TootTally/TootTallyLeaderboard",
     "description": "TootTally Global Leaderboards and Replay System",
     "dependencies": [

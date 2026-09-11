@@ -1,4 +1,5 @@
-﻿using BaboonAPI.Hooks.Initializer;
+﻿using B83.Win32;
+using BaboonAPI.Hooks.Initializer;
 using BepInEx;
 using BepInEx.Configuration;
 using HarmonyLib;
@@ -70,7 +71,9 @@ namespace TootTallyLeaderboard
                 SessionDate = Config.Bind("General", "Session Date", DateTime.Now.ToString(CultureInfo.InvariantCulture), "The last time that the session started recording."),
                 SessionStartTT = Config.Bind("General", "TT Session Start", 0f, "The amount of TT you started the session with."),
                 ShowcaseMode = Config.Bind("General", "Replay Showcase Mode", false, "Hides the replay HUD and mouse cursor when viewing a replay."),
-                LoadLocalReplays = Config.Bind("General", "Load Local Replays", false, "Only load local replays instead of the online leaderboard.")
+                LoadLocalReplays = Config.Bind("General", "Load Local Replays", false, "Only load local replays instead of the online leaderboard."),
+                ShowReplaySpeedSlider = Config.Bind("Replays", "Show Replay Speed Slider", true, "Show the slider to change the playback speed of replays."),
+                ShowReplayTimestampSlider = Config.Bind("Replays", "Show Replay Timestamp Slider", true, "Show the big timeline slider for replays.")
             };
 
             TootTallySettings.Plugin.MainTootTallySettingPage.AddToggle("Show Leaderboard", option.ShowLeaderboard);
@@ -79,6 +82,8 @@ namespace TootTallyLeaderboard
             TootTallySettings.Plugin.MainTootTallySettingPage.AddToggle("Submit Scores", option.SubmitScores);
             TootTallySettings.Plugin.MainTootTallySettingPage.AddToggle("Replay Showcase Mode", option.ShowcaseMode);
             TootTallySettings.Plugin.MainTootTallySettingPage.AddToggle("Load Local Replays", option.LoadLocalReplays, OnToggleLocalReplaysLoadReplays);
+            TootTallySettings.Plugin.MainTootTallySettingPage.AddToggle("Show Replay Speed Slider", option.ShowReplaySpeedSlider);
+            TootTallySettings.Plugin.MainTootTallySettingPage.AddToggle("Show Replay Timestamp Slider", option.ShowReplayTimestampSlider);
             AssetManager.LoadAssets(Path.Combine(Path.GetDirectoryName(Instance.Info.Location), "Assets"));
 
             ShouldUpdateSession = DateTime.TryParse(Instance.option.SessionDate.Value, out DateTime lastSessionDatetime)
@@ -114,6 +119,8 @@ namespace TootTallyLeaderboard
             public ConfigEntry<float> SessionStartTT { get; set; }
             public ConfigEntry<bool> ShowcaseMode { get; set; }
             public ConfigEntry<bool> LoadLocalReplays { get; set; }
+            public ConfigEntry<bool> ShowReplaySpeedSlider { get; set; }
+            public ConfigEntry<bool> ShowReplayTimestampSlider { get; set; }
         }
     }
 }

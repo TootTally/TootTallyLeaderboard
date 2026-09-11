@@ -1,10 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Runtime.InteropServices;
-using BaboonAPI.Hooks.Tracks;
+﻿using BaboonAPI.Hooks.Tracks;
 using BepInEx;
 using HarmonyLib;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
 using TMPro;
 using TootTallyAccounts;
 using TootTallyCore.APIServices;
@@ -374,6 +375,7 @@ namespace TootTallyLeaderboard.Replays
             switch (_replayManagerState)
             {
                 case ReplayManagerState.Replaying:
+                    if (Plugin.Instance.option.ShowcaseMode.Value) break;
                     _replayTimestampSlider.SetValueWithoutNotify(__instance.musictrack.time / __instance.musictrack.clip.length);
                     if (_replayIndicatorMarquee.text.Equals(""))
                     {
@@ -576,7 +578,7 @@ namespace TootTallyLeaderboard.Replays
                         ResolveLoadReplay(uuid, levelSelectControllerInstance);
                     }));
                     break;
-
+                
                 case NewReplaySystem.ReplayState.ReplayLoadErrorIncompatible:
                     break;
                 case NewReplaySystem.ReplayState.ReplayLoadError:
@@ -782,6 +784,9 @@ namespace TootTallyLeaderboard.Replays
                 Directory.CreateDirectory(replayDir);
             }
 
+            if (_replayUUID == null)
+                _replayUUID = _replay.GetSongName + string.Concat(Enumerable.Range(0, 32).Select(_ =>  UnityEngine.Random.Range(0, 10)));
+
             try
             {
                 FileHelper.WriteJsonToFile(replayDir + "\\", _replayUUID + ".ttr", _replay.GetRecordedReplayJson(_replayUUID));
@@ -844,7 +849,7 @@ namespace TootTallyLeaderboard.Replays
             });
             #endregion
 
-            _replaySpeedSlider.gameObject.SetActive(true);
+            _replaySpeedSlider.gameObject.SetActive(Plugin.Instance.option.ShowReplaySpeedSlider.Value);
             _replaySpeedSlider.gameObject.GetComponent<RectTransform>().anchoredPosition = new Vector2(-150, 190);
         }
 
@@ -875,6 +880,7 @@ namespace TootTallyLeaderboard.Replays
                 }
 
                 __instance.musictrack.time = __instance.musictrack.clip.length * value;
+                TootTallyPatches.SetCurrentSongTime(__instance.musictrack.time);
                 __instance.syncTrackPositions(__instance.musictrack.time); //SyncTrack in case smooth scrolling is on
                 __instance.currentnoteindex = Mathf.Clamp(__instance.leveldata.FindIndex(note => note[0] * __instance.defaultnotelength >= Mathf.Abs((float)__instance.track_xpos_smoothscrolling)) - 1, 0, __instance.leveldata.Count - 1);
                 __instance.grabNoteRefs(0); //the parameter is the note increment. Putting 0 just gets the noteData for currentnoteindex's value
@@ -887,7 +893,7 @@ namespace TootTallyLeaderboard.Replays
                 _hasRewindReplay = true;
                 EventSystem.current.SetSelectedGameObject(null);
             });
-            _replayTimestampSlider.gameObject.SetActive(true);
+            _replayTimestampSlider.gameObject.SetActive(Plugin.Instance.option.ShowReplayTimestampSlider.Value);
         }
 
         private static void SetReplayMarquees(Transform canvasTransform)

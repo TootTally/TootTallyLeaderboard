@@ -18,6 +18,7 @@ using TootTallyCore.Utils.Helpers;
 using TootTallyCore.Utils.TootTallyGlobals;
 using TootTallyCore.Utils.TootTallyNotifs;
 using TootTallyDiffCalcLibs;
+using TootTallyGameModifiers;
 using TootTallyLeaderboard.Replays;
 using TrombLoader.CustomTracks;
 using UnityEngine;
@@ -55,7 +56,6 @@ namespace TootTallyLeaderboard
         private List<LeaderboardRowEntry> _scoreGameObjectList;
         private List<SerializableClass.ScoreDataFromDB> _tempAllReplayData;
         private SerializableClass.SongDataFromDB _songData;
-        //private Chart _localSongData;
         private Slider _slider, _gameSpeedSlider;
         private ScrollableSliderHandler _scrollableSliderHandler;
         private GameObject _sliderHandle;
@@ -145,13 +145,13 @@ namespace TootTallyLeaderboard
             _diffRating.outlineWidth = 0.2f;
             _diffRating.fontSize = 20;
             _diffRating.alignment = TextAlignmentOptions.MidlineRight;
-            _diffRating.rectTransform.sizeDelta = new Vector2(355, 30);
+            _diffRating.rectTransform.sizeDelta = new Vector2(375, 30);
             _diffRating.rectTransform.anchorMin = _diffRating.rectTransform.anchorMax = new Vector2(0, .5f);
             _diffRating.rectTransform.offsetMin = Vector2.zero;
 
             _starMaskAnimation = new SecondDegreeDynamicsAnimation(1.23f, 1f, 1.2f);
 
-            _ratedIcon = GameObjectFactory.CreateImageHolder(_globalLeaderboard.transform, new Vector2(350, 180), Vector2.one * 42f, AssetManager.GetSprite("rated64.png"), "RatedChartIcon");
+            _ratedIcon = GameObjectFactory.CreateImageHolder(_globalLeaderboard.transform, new Vector2(387, 176), Vector2.one * 42f, AssetManager.GetSprite("rated64.png"), "RatedChartIcon");
             var bubble = _ratedIcon.AddComponent<BubblePopupHandler>();
             bubble.Initialize(GameObjectFactory.CreateBubble(new Vector2(300, 40), "RatedIconBubble", "This chart is rated.", 6, true, 12));
 
@@ -325,9 +325,38 @@ namespace TootTallyLeaderboard
             }
             else
             {
-                diff = DiffCalcGlobals.selectedChart.GetDiffRating(TootTallyGlobalVariables.gameSpeedMultiplier);
+                diff = DiffCalcGlobals.selectedChart.GetDynamicDiffRating(TootTallyGlobalVariables.gameSpeedMultiplier, 1);
                 _diffRating.text = $"~{diff:0.0}";
             }
+            int roundedUpStar = (int)Mathf.Clamp(diff + 1, 1, 10);
+            int roundedDownStar = (int)Mathf.Clamp(diff, 0, 9);
+            _starMaskAnimation.SetStartVector(_diffRatingMaskRectangle.sizeDelta);
+            _starRatingMaskSizeTarget = new Vector2(EasingHelper.Lerp(_starSizeDeltaPositions[roundedUpStar], _starSizeDeltaPositions[roundedDownStar], roundedUpStar - diff), 30);
+        }
+
+        public void UpdateStarRatingFromChart(Chart c)
+        {
+            if (!int.TryParse(c.difficulty, out int star) || _levelSelectControllerInstance == null || _songData != null) return;
+            for (int i = 0; i < 10; i++)
+            {
+                if (!Plugin.Instance.option.ShowLeaderboard.Value && i >= star) break;
+
+                if (!Theme.isDefault)
+                    _levelSelectControllerInstance.diffstars[i].color = Color.Lerp(Theme.colors.diffStar.gradientStart, Theme.colors.diffStar.gradientEnd, i / 9f);
+                else
+                    _levelSelectControllerInstance.diffstars[i].color = Color.white;
+
+                if (Plugin.Instance.option.ShowLeaderboard.Value)
+                {
+                    var rect = _levelSelectControllerInstance.diffstars[i].gameObject.GetComponent<RectTransform>();
+                    var rect2 = _levelSelectControllerInstance.diffstars[i].transform.parent.gameObject.GetComponent<RectTransform>();
+                    rect.anchorMin = rect.anchorMax = new Vector2(.5f, .5f);
+                    rect2.anchorMin = rect2.anchorMax = new Vector2(0, .5f);
+                    _levelSelectControllerInstance.diffstars[i].maskable = true;
+                }
+            }
+            float diff = c.GetDynamicDiffRating(TootTallyGlobalVariables.gameSpeedMultiplier, 1);
+            _diffRating.text = $"~{diff:0.0}";
             int roundedUpStar = (int)Mathf.Clamp(diff + 1, 1, 10);
             int roundedDownStar = (int)Mathf.Clamp(diff, 0, 9);
             _starMaskAnimation.SetStartVector(_diffRatingMaskRectangle.sizeDelta);
@@ -358,13 +387,16 @@ namespace TootTallyLeaderboard
                 if (songHashInDB == 0)
                 {
                     _errorText.text = ERROR_NO_SONGHASH_FOUND_TEXT;
-                    Plugin.LogInfo($" - {DiffCalcGlobals.selectedChart.trackRef}");
+                    Plugin.LogInfo($"Diff calc trackref: {DiffCalcGlobals.selectedChart.trackRef}");
                     if (DiffCalcGlobals.selectedChart.trackRef != "")
-                        _diffRating.text = $"~{DiffCalcGlobals.selectedChart.GetDiffRating(TootTallyGlobalVariables.gameSpeedMultiplier):0.0}";
+                        _diffRating.text = $"~{DiffCalcGlobals.selectedChart.GetDynamicDiffRating(TootTallyGlobalVariables.gameSpeedMultiplier, 1):0.0}";
                     else
                         _diffRating.text = "NA";
                     UpdateStarRating(__instance);
-                    callback(LeaderboardState.ErrorNoSongHashFound);
+                    if (Plugin.Instance.option.LoadLocalReplays.Value)
+                        StartLocalLeaderboardRoutine();
+                    else
+                        callback(LeaderboardState.ErrorNoSongHashFound);
                     return; // Skip if no song found
                 }
                 else
@@ -453,10 +485,10 @@ namespace TootTallyLeaderboard
         }
 
         //THIS IS JUST IN TESTING PHASE, NOT TO BE USED
+        private Coroutine _localReplayCoroutine;
         public void StartLocalLeaderboardRoutine()
         {
-            _currentLeaderboardCoroutines.Add(RefreshLeaderboardLocal());
-            Plugin.Instance.StartCoroutine(_currentLeaderboardCoroutines.Last());
+            _localReplayCoroutine = Plugin.Instance.StartCoroutine(RefreshLeaderboardLocal());
         }
 
         public IEnumerator<UnityWebRequestAsyncOperation> RefreshLeaderboardLocal()
@@ -484,7 +516,7 @@ namespace TootTallyLeaderboard
                     var convertedData = new SerializableClass.ScoreDataFromDB()
                     {
                         grade = GetGradeFromLocalReplay(replayData.finalnotetallies, gamePercent),
-                        is_rated = _songData.is_rated,
+                        is_rated = _songData != null ? _songData.is_rated : false,
                         max_combo = replayData.maxcombo,
                         modifiers = replayData.gamemodifiers.Length == 0 || replayData.gamemodifiers.ToUpper().Contains("NONE") ? null : replayData.gamemodifiers.Split(','),
                         percentage = percent * 100f,

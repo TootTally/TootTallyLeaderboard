@@ -30,9 +30,10 @@ namespace TootTallyLeaderboard.Replays
         private ReplayData _replayData;
         private dynamic[] _lastFrame, _currentFrame;
         private dynamic[] _currentToot;
+        public dynamic[] GetCurrentToot => _currentToot;
         private dynamic[] _currentNote;
 
-        public float GetReplaySpeed { get => _replayData.gamespeedmultiplier; }
+        public float GetReplaySpeed { get => _replayData.gamespeedmultiplier != 0 ? _replayData.gamespeedmultiplier : 1; }
 
         private bool _wasTouchScreenUsed;
         private bool _wasTabletUsed = false;
@@ -75,7 +76,7 @@ namespace TootTallyLeaderboard.Replays
 
             _currentFrame = new dynamic[5];
             _currentNote = new dynamic[9];
-            _currentToot = new dynamic[3];
+            _currentToot = new dynamic[4];
             _replayData.screenwidth = Screen.width;
             _replayData.screenheight = Screen.height;
             Plugin.LogInfo("Started recording replay");
@@ -270,21 +271,27 @@ namespace TootTallyLeaderboard.Replays
             }
         }
 
-        public ReplayState LoadReplay(string replayFileName)
+        /// <summary>
+        /// Default path is inside the Replays folder in Bepinex
+        /// </summary>
+        /// <param name="replayFileName"></param>
+        /// <returns></returns>
+        public ReplayState LoadReplay(string replayFileName) => LoadReplay(replayFileName, Path.Combine(Paths.BepInExRootPath, "Replays/"));
+
+        public ReplayState LoadReplay(string replayFileName, string path)
         {
-            string replayDir = Path.Combine(Paths.BepInExRootPath, "Replays/");
-            if (!Directory.Exists(replayDir))
+            if (!Directory.Exists(path))
             {
                 Plugin.LogInfo("Replay folder not found");
                 return ReplayState.ReplayLoadError;
             }
-            if (!File.Exists(replayDir + replayFileName + ".ttr"))
+            if (!File.Exists(path + replayFileName + ".ttr"))
             {
                 Plugin.LogInfo("Replay File does not exist");
                 return ReplayState.ReplayLoadNotFound;
             }
 
-            string jsonFileFromZip = FileHelper.ReadJsonFromFile(replayDir, replayFileName + ".ttr");
+            string jsonFileFromZip = FileHelper.ReadJsonFromFile(path, replayFileName + ".ttr");
 
             var replayVersion = JsonConvert.DeserializeObject<ReplayVersion>(jsonFileFromZip).version;
             _replayData = JsonConvert.DeserializeObject<ReplayData>(jsonFileFromZip);
@@ -375,8 +382,6 @@ namespace TootTallyLeaderboard.Replays
         {
             if (Plugin.Instance.option.ShowcaseMode.Value)
                 Cursor.visible = false;
-            else
-                Cursor.visible = true;
             __instance.previous_high_score_surpassed = true; // prevents the new high score yellow highlight from appearing
             if (!__instance.controllermode) __instance.controllermode = true; //Still required to not make the mouse position update
 
@@ -384,7 +389,7 @@ namespace TootTallyLeaderboard.Replays
                 time = (_replayData.pluginbuilddate < 20230705 ?
                  Math.Abs(__instance.noteholder.transform.position.x) : Math.Abs(__instance.noteholderr.anchoredPosition.x)) * GetNoteHolderPrecisionMultiplier();
             else
-                time -= ((GlobalVariables.localsettings.latencyadjust / 1000f) - _replayData.audiolatency / 1000f);
+                time -= (GlobalVariables.localsettings.latencyadjust / 1000f * TootTallyGlobalVariables.gameSpeedMultiplier) - (_replayData.audiolatency / 1000f * TootTallyGlobalVariables.gameSpeedMultiplier);
             PlaybackTimeFrameData(time);
             PlaybackTimeTootData(time);
             if (_replayData.framedata.Count > _frameIndex && _lastFrame != null && _currentFrame != null)
@@ -418,7 +423,7 @@ namespace TootTallyLeaderboard.Replays
             _mousePos = new((float)_currentFrame[(int)FDStruct.MX], (float)_currentFrame[(int)FDStruct.MY], 0f);
         }
 
-        private void PlaybackTimeFrameData(float time)
+        public void PlaybackTimeFrameData(float time)
         {
 
             if (_lastFrame != _currentFrame && _currentFrame != null && time >= _currentFrame[(int)FDStruct.T])
@@ -432,7 +437,7 @@ namespace TootTallyLeaderboard.Replays
             }
         }
 
-        private void PlaybackTimeTootData(float time)
+        public void PlaybackTimeTootData(float time)
         {
             if (_currentToot != null && time >= _currentToot[(int)TDStruct.T] && _isTooting != (_currentToot[(int)TDStruct.O] == 1))
                 _isTooting = _currentToot[(int)TDStruct.O] == 1;
@@ -572,7 +577,8 @@ namespace TootTallyLeaderboard.Replays
         {
             T, //Time
             N, //NoteHolder
-            O //IsTooting
+            O, //IsTooting
+            K, //KeyPresses
         }
 
         public enum NDStruct

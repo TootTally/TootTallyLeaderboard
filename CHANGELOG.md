@@ -1,5 +1,12 @@
 #### Changelog:
 
+`v1.2.8` -> `v1.2.9`
+```diff
++ Fixed UI elements being placed weird
++ Fixed DiffCalcLibs being halved sometimes
++ 
+```
+
 `v1.2.7` -> `v1.2.8`
 ```diff
 + Fix daily tt counter if from Europe
